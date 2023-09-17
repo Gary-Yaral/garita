@@ -65,19 +65,19 @@ def read_plate():
                 # Limpiamos y validamos el texto
                 is_valid, clean_text = plate.is_plate(text)
                 if is_valid == True :
-                    cv2.putText(img, text=clean_text, org=(y1, x2 + 30), fontFace=font, fontScale=1, color=(0, 255, 0), thickness=2, lineType=cv2.LINE_AA)
+                    cv2.putText(img, text=clean_text, org=(y1, x2 + 30), fontFace=font, fontScale=1, color=(255, 255, 0), thickness=2, lineType=cv2.LINE_AA)
 
                     # Buscamos la placa en la base de datos
                     was_found, data = findPlateInDB(clean_text)
                     if was_found == True:
                         cv2.putText(img, text="Encontrada", org=(y1, x2 + 50), 
-                        fontFace=font, fontScale=1, color=(255, 0, 0), thickness=2, lineType=cv2.LINE_AA)
+                        fontFace=font, fontScale=1, color=(0, 255, 0), thickness=2, lineType=cv2.LINE_AA)
                         print(data)
                     else:
                         cv2.putText(img, text="Desconocida", org=(y1, x2 + 50), 
-                        fontFace=font, fontScale=1, color=(255, 0, 0), thickness=2, lineType=cv2.LINE_AA)
+                        fontFace=font, fontScale=1, color=(0, 0, 255), thickness=2, lineType=cv2.LINE_AA)
                         print(data)
-                cv2.rectangle(img, (y1, x1), (y2, x2), (0, 255, 0), 3)
+                cv2.rectangle(img, (y1, x1), (y2, x2), (255, 255, 0), 3)
             else:
                 # Si la imagen recortada es demasiado pequeña o vacía, mantén el texto en blanco
                 text = ""

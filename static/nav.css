@@ -1,17 +1,23 @@
+:root {
+  --color-nav: rgb(58, 53, 53);
+  --hover-bg: rgb(255, 252, 76);
+}
+
 nav {
   padding: 1rem;
   display: flex;
   justify-content: space-between;
-  background: blue;
+  background: rgb(255, 255, 255);
   height: 4rem;
   box-sizing: border-box;
   align-items: center;
+  box-shadow: 0px 0px 4px 1px rgb(223, 223, 223);
 }
 
 nav h1, 
 nav ul, 
 nav ul li {
-  color: white
+  color: var(--color-nav);
 }
 
 nav ul {
@@ -21,8 +27,8 @@ nav ul {
 }
 
 nav ul li{
+  height: 100%;
   list-style: none;
-  padding: 1.5rem;
   display: flex;
   align-items: center;
   box-sizing: border-box;
@@ -30,15 +36,37 @@ nav ul li{
 }
 
 nav ul li:hover {
-  background: rgb(88, 88, 255);
+  background: var(--hover-bg);
 }
 
 nav ul li a{
   text-decoration: none;
-  color: white;
+  color: var(--color-nav);
   width: 100%;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 1rem;
+}
+
+.color-bars {
+  font-size: 1.5rem;
+  padding: 10px;
+  cursor: pointer;
+  display: none;
+}
+
+.color-bars:hover {
+  background: var(--hover-bg);
+}
+
+@media screen and (max-width: 900px) {
+  nav ul {
+    display: none;
+  }
+
+  .color-bars {
+    display: flex;
+  }
 }

@@ -2,6 +2,7 @@ from flask import Flask, render_template, Response
 import pytesseract
 from reader_plate import read_plate
 from plate_validator import Plate
+from utils import data
 
 app = Flask(__name__)
 
@@ -12,7 +13,11 @@ plate = Plate()
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', data=data)
+
+@app.route('/camera')
+def video_camera():
+    return render_template('camera.html', data=data)
 
 @app.route('/video_feed')
 def video_feed():

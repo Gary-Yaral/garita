@@ -3,21 +3,44 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400&family=Open+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <link rel="stylesheet" href="{{url_for("static", filename='main.css')}}">
   <link rel="stylesheet" href="{{url_for("static", filename='nav.css')}}">
+  <link rel="stylesheet" href="{{url_for("static", filename='nav_float.css')}}">
   <title>Login</title>
 </head>
 <body>
   <main>
-    {% include 'commons/nav.html' %}
-
-    <h1>Inicio</h1>
-    <div>
-      <img src="{{ url_for('video_feed') }}" id="videoImage" alt="">
-    </div>
-    <!-- Botones para activar y desactivar la imagen -->
-    <button onclick="activarImagen()">Activar Imagen</button>
-    <button onclick="desactivarImagen()">Desactivar Imagen</button>
+    {% include 'commons/nav.html'%}
+    <section class="content">
+      {% include 'commons/nav_float.html' %}
+      <div class="home">
+        <div class="info">
+          <img src="{{url_for("static", filename='img/banner3.jpg')}}" alt="banner">
+          <h1 class="info-title">Bienvenido al Sistema</h1>
+          <hr class="line">
+          <div class="card">
+            <span class="card-prop">Entradas</span>
+            <span class="card-number">15</span>
+          </div>
+          <div class="card">
+            <span class="card-prop">Salidas</span>
+            <span class="card-number">15</span>
+          </div>
+        </div>
+        <div class="camera_home">
+          <!-- Botones para activar y desactivar la imagen -->
+          <div class="camera_btns">
+            <button class="btn_action" onclick="activarImagen()">Activar Cámara</button>
+            <button class="btn_action" onclick="desactivarImagen()">Apagar Cámara</button>
+          </div>
+          <img src="{{ url_for('video_feed') }}" id="videoImage" alt="">
+        </div>
+      </div>
+    </section>
   </main>
 
   <script>
@@ -31,5 +54,6 @@
           document.getElementById('videoImage').style.display = 'none';
       }
   </script>
+  {% include 'commons/script_nav.html'%}
 </body>
 </html>
