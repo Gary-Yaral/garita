@@ -8,3 +8,5 @@ data = [
     ("Registros", "/registers", "fa-solid fa-list"),
     ("Salir", "/exit", "fa-solid fa-arrow-right-from-bracket"),
 ]
+
+system_name = "Garita"
