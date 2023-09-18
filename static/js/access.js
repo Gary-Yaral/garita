@@ -56,10 +56,8 @@ form.onsubmit = async (e) => {
   e.preventDefault()
   if(validateForm(e)){
     const result = await senData()
-    console.log(result);
-    /* if(result.access) {
-      console.log("redirecciona")
-    } */
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(result))
+    window.location = "home"
   } 
 }
 
