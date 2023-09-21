@@ -11,7 +11,7 @@ config = '--psm 1'
 cap = cv2.VideoCapture(0) 
 plate = Plate()
 
-def read_plate():
+def read_plate(socket):
     text = ""
     while True:
         ret, img = cap.read()
@@ -72,11 +72,11 @@ def read_plate():
                     if was_found == True:
                         cv2.putText(img, text="Encontrada", org=(y1, x2 + 50), 
                         fontFace=font, fontScale=1, color=(0, 255, 0), thickness=2, lineType=cv2.LINE_AA)
-                        print(data)
+                        socket.emit("detected", {"plate_number": clean_text,"exists": True})
                     else:
                         cv2.putText(img, text="Desconocida", org=(y1, x2 + 50), 
                         fontFace=font, fontScale=1, color=(0, 0, 255), thickness=2, lineType=cv2.LINE_AA)
-                        print(data)
+                        socket.emit("detected", {"plate_number": clean_text,"exists": False})
                 cv2.rectangle(img, (y1, x1), (y2, x2), (255, 255, 0), 3)
             else:
                 # Si la imagen recortada es demasiado pequeña o vacía, mantén el texto en blanco
