@@ -1,11 +1,12 @@
-from flask import Flask, request, render_template, Response, jsonify
+from flask import Flask, Response, jsonify
 from reader_plate import read_plate
 from plate_validator import Plate
 import pytesseract
-from guards.access_guard import jwt_required, jwt_create
+from guards.access_guard import jwt_required
 from config.env import secret_key, url_frontend
 from flask_cors import CORS
 from flask_socketio import SocketIO
+from routes import user
 
 app = Flask(__name__)
 app.secret_key = secret_key
@@ -16,6 +17,8 @@ socket = SocketIO(app, cors_allowed_origins= url_frontend)
 pytesseract.pytesseract.tesseract_cmd = r'C:\Users\Hp\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
 config = '--psm 1'
 plate = Plate()
+
+app.register_blueprint(user.user_bp)
 
 @app.route('/')
 def index():
@@ -30,25 +33,6 @@ def auth():
 def video_feed():
     return Response(read_plate(socket), mimetype='multipart/x-mixed-replace; boundary=frame')
 
-@app.route('/get-access', methods=["POST"])
-def get_access():
-    data = request.form
-    username = data.get('username')
-    password = data.get('password')
-    token = jwt_create({
-        "username": username
-    }, app.secret_key)
-
-    session_data =  {
-        "data":{
-            "username": username, 
-            "roles": []
-        }, 
-        "token": token}
-
-    data = {"access": True, "info": session_data}
-    
-    return jsonify(data)
 
 if __name__ == "__main__":
     app.run(debug=True, port=4000)
