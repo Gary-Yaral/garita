@@ -20,10 +20,6 @@ plate = Plate()
 
 app.register_blueprint(user.user_bp)
 
-@app.route('/')
-def index():
-    return jsonify({"404": "Not Found"})
-
 @app.route('/auth', methods=["POST"])
 @jwt_required
 def auth():
@@ -32,6 +28,11 @@ def auth():
 @app.route('/video_feed')
 def video_feed():
     return Response(read_plate(socket), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return jsonify({"404": "Not Found"})
 
 
 if __name__ == "__main__":

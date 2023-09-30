@@ -126,16 +126,16 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `status_type`;
 
 CREATE TABLE `status_type` (
-  `int` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
-  PRIMARY KEY (`int`)
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;
 
 /*Data for the table `status_type` */
 
 LOCK TABLES `status_type` WRITE;
 
-insert  into `status_type`(`int`,`name`) values (1,'INGRESO'),(2,'SALIDA');
+insert  into `status_type`(`id`,`name`) values (1,'INGRESO'),(2,'SALIDA');
 
 UNLOCK TABLES;
 
@@ -160,7 +160,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 
-insert  into `user`(`id`,`dni`,`name`,`surname`,`username`,`password`,`fk_user_status_id`) values (1,'0000000000','Super','Admin','G4r1t4_2xx3','$2b$12$Cureq7STeHlTGDC.DuWHD.Jj1EBHC28x1j4Thsj2cWS6coU6TMKri',3),(2,'0000000001','Usuario','Admin','ECu4d0r_2xx3','$2b$12$RJVEdhLO4CdmRgFZEOwntOS3vqdFBFyvQ2QGdOWJjmELSJrexncly',1),(3,'0000000002','Usuario','Guardia','S3cUrity_Eye','$2b$12$QoTA/UpJPrkWr/PsP0ETn.Wd39iyN0wFL7kZDvUFKCml6YhDgIJ7y',1);
+insert  into `user`(`id`,`dni`,`name`,`surname`,`username`,`password`,`fk_user_status_id`) values (1,'0000000000','Super','Admin','G4r1t4_2xx3','$2b$12$Cureq7STeHlTGDC.DuWHD.Jj1EBHC28x1j4Thsj2cWS6coU6TMKri',3),(2,'0000000001','Admin','System','ECu4d0r_2xx3','$2b$12$RJVEdhLO4CdmRgFZEOwntOS3vqdFBFyvQ2QGdOWJjmELSJrexncly',1),(3,'0000000002','Guardia','Seguridad','S3cUrity_Eye','$2b$12$QoTA/UpJPrkWr/PsP0ETn.Wd39iyN0wFL7kZDvUFKCml6YhDgIJ7y',1);
 
 UNLOCK TABLES;
 
@@ -221,7 +221,7 @@ CREATE TABLE `vehicles` (
   KEY `status_type_id` (`status_type_id`),
   KEY `vehicle_type_id` (`vehicle_type_id`),
   CONSTRAINT `vehicles_ibfk_1` FOREIGN KEY (`access_type_id`) REFERENCES `access_type` (`id`) ON UPDATE CASCADE,
-  CONSTRAINT `vehicles_ibfk_2` FOREIGN KEY (`status_type_id`) REFERENCES `status_type` (`int`) ON UPDATE CASCADE,
+  CONSTRAINT `vehicles_ibfk_2` FOREIGN KEY (`status_type_id`) REFERENCES `status_type` (`id`) ON UPDATE CASCADE,
   CONSTRAINT `vehicles_ibfk_3` FOREIGN KEY (`vehicle_type_id`) REFERENCES `vehicles_type` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

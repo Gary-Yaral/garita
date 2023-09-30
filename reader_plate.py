@@ -2,8 +2,9 @@ import cv2
 import pytesseract
 import imutils
 import numpy as np
-from plate_validator import Plate
 from find_in_db import findPlateInDB
+from plate_validator import Plate
+from models.vehicle_model import VehicleModel
 
 # Configuración de la ubicación de Tesseract OCR
 pytesseract.pytesseract.tesseract_cmd = r'C:\Users\Hp\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
@@ -68,15 +69,15 @@ def read_plate(socket):
                     cv2.putText(img, text=clean_text, org=(y1, x2 + 30), fontFace=font, fontScale=1, color=(255, 255, 0), thickness=2, lineType=cv2.LINE_AA)
 
                     # Buscamos la placa en la base de datos
-                    was_found, data = findPlateInDB(clean_text)
+                    was_found, vehicleData = VehicleModel.find_vehicle(clean_text)
                     if was_found == True:
                         cv2.putText(img, text="Encontrada", org=(y1, x2 + 50), 
                         fontFace=font, fontScale=1, color=(0, 255, 0), thickness=2, lineType=cv2.LINE_AA)
-                        socket.emit("detected", {"plate_number": clean_text,"exists": True})
+                        socket.emit("detected", {"vehicle": vehicleData,"exists": True})
                     else:
                         cv2.putText(img, text="Desconocida", org=(y1, x2 + 50), 
                         fontFace=font, fontScale=1, color=(0, 0, 255), thickness=2, lineType=cv2.LINE_AA)
-                        socket.emit("detected", {"plate_number": clean_text,"exists": False})
+                        socket.emit("detected", {"vehicle": {"plate_number": clean_text},"exists": False})
                 cv2.rectangle(img, (y1, x1), (y2, x2), (255, 255, 0), 3)
             else:
                 # Si la imagen recortada es demasiado pequeña o vacía, mantén el texto en blanco
