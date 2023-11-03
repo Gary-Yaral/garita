@@ -2,13 +2,14 @@ from flask import Flask, Response, jsonify
 from reader_plate import read_plate
 from plate_validator import Plate
 import pytesseract
-from guards.access_guard import jwt_required
 from config.env import secret_key, url_frontend
 from flask_cors import CORS
 from flask_socketio import SocketIO
-from routes import user
+from routes import user, driver
+
 
 app = Flask(__name__)
+
 app.secret_key = secret_key
 CORS(app, resources={r"/*": {"origins": url_frontend}})
 socket = SocketIO(app, cors_allowed_origins= url_frontend)
@@ -18,12 +19,8 @@ pytesseract.pytesseract.tesseract_cmd = r'C:\Users\Hp\AppData\Local\Programs\Tes
 config = '--psm 1'
 plate = Plate()
 
-app.register_blueprint(user.user_bp)
-
-@app.route('/auth', methods=["POST"])
-@jwt_required
-def auth():
-    return jsonify({"access": True})
+app.register_blueprint(user.user_bp, url_prefix='/user')
+app.register_blueprint(driver.driver_bp, url_prefix='/driver')
 
 @app.route('/video_feed')
 def video_feed():
