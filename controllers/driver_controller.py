@@ -7,10 +7,25 @@ def get_page_data():
     per_page = data.get('per_page')
     current_page = data.get('current_page')
     # Si los datos no fueron enviados retornamos un error
-    if per_page == None and current_page == None:
+    if per_page == None or current_page == None:
         return jsonify({'error': True, 'message': 'Datos no recibidos'})
-    # Si los datos fueron enviados entonces buscamos el usuario
+    # Si los datos fueron enviados entonces consultamos todos los registros
     found_drivers = drivers.load(per_page, current_page)
+    # Si el usuario no fue encontrado retornamos un error
+    if found_drivers == None:
+        return jsonify({'error': True, 'message': 'Error query'})
+    return jsonify({'drivers': found_drivers})
+
+def get_filtered_data():
+    data = request.json
+    per_page = data.get('per_page')
+    current_page = data.get('current_page')
+    filter_text = data.get('filter')
+    # Si los datos no fueron enviados retornamos un error
+    if per_page == None or current_page == None or filter_text == None:
+        return jsonify({'error': True, 'message': 'Datos no recibidos'})
+    # Si los datos fueron enviados entonces filtramos los datos
+    found_drivers = drivers.filter(per_page, current_page, filter_text)
     # Si el usuario no fue encontrado retornamos un error
     if found_drivers == None:
         return jsonify({'error': True, 'message': 'Error query'})
