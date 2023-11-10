@@ -14,7 +14,7 @@ def get_page_data():
     # Si el usuario no fue encontrado retornamos un error
     if found_drivers == None:
         return jsonify({'error': True, 'message': 'Error query'})
-    return jsonify({'drivers': found_drivers})
+    return jsonify({'result': found_drivers})
 
 def get_filtered_data():
     data = request.json
@@ -29,8 +29,8 @@ def get_filtered_data():
     # Si el usuario no fue encontrado retornamos un error
     if found_drivers == None:
         return jsonify({'error': True, 'message': 'Error query'})
-    return jsonify({'drivers': found_drivers})
+    return jsonify({'result': found_drivers})
 
 def get_total_rows():
     counted = drivers.get_total()
-    return jsonify({'drivers':counted})
+    return jsonify({'result':counted})
