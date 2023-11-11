@@ -111,5 +111,58 @@ class Driver():
       print("Error: {}".format(e))
     finally:
       closeConnection(self)
-    
+
+  def get_types(self):
+    openConnection(self, MysqlDB)
+    try:
+      query = """
+          SELECT * FROM driver_type;
+          """
+      params = ()
+      self.cursor.execute(query, params)
+      result = self.cursor.fetchall()
+      if result == None:
+        return (False, None)
+      return (True, result)
+    except Exception as e:
+      print("Error: {}".format(e))
+    finally:
+      closeConnection(self) 
+
+  def update(self, _id, dni, name, surname, type_id):
+    openConnection(self, MysqlDB)
+    try:
+      # Si ya existe la cedula y no pertenece al mismo chofer entonces retornamos error
+      query = """SELECT * FROM driver WHERE dni = %s"""
+      params = (dni,)
+      self.cursor.execute(query, params)
+      result = self.cursor.fetchall()
+      print(result)
+      for drive in result:
+        print(drive['id'] != _id)
+        if drive['id'] != _id:
+          return (False, {'error': 'Ya existe un usuario con ese número de cedula'})
+      
+      # Si la cedula pertenece al mismo chofer
+      query = """
+            UPDATE driver
+            SET 
+              dni = %s, 
+              name = %s, 
+              surname = %s, 
+              drive_type_id = %s
+            WHERE id = %s
+          """
+      params = (dni, name, surname, type_id, _id)
+      self.cursor.execute(query, params)
+      if self.cursor.rowcount == 0:
+        return (False, {'error': 'No se ha podido realizar la actualización'})
+      self.conn.commit()
+      return (True, {'message':'Chofer actualizado correctamente'})
+    except Exception as e:
+      print("Error: {}".format(e))
+    finally:
+      closeConnection(self)  
+
+  
 DriverModel = Driver()

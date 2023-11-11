@@ -34,3 +34,19 @@ def get_filtered_data():
 def get_total_rows():
     counted = drivers.get_total()
     return jsonify({'result':counted})
+
+def get_types():
+    types = drivers.get_types()
+    return jsonify({'result':types})
+
+def update():
+    data = request.json
+    print(data)
+    _id = data.get('id')
+    dni = data.get('dni')
+    name = data.get('name')
+    surname = data.get('surname')
+    type_id = data.get('type_id')
+    """ return jsonify({'error': True, 'message': 'Datos no recibidos'}) """
+    result = drivers.update(_id, dni, name, surname, type_id)
+    return jsonify({'result':result})
