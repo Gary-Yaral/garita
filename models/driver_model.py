@@ -137,11 +137,12 @@ class Driver():
       params = (dni,)
       self.cursor.execute(query, params)
       result = self.cursor.fetchall()
-      print(result)
+      isSameDriver = True
       for drive in result:
-        print(drive['id'] != _id)
         if drive['id'] != _id:
-          return (False, {'error': 'Ya existe un usuario con ese número de cedula'})
+          isSameDriver = False
+      if isSameDriver == False:
+        return (False, {'error': 'Ya existe un usuario con ese número de cedula'})
       
       # Si la cedula pertenece al mismo chofer
       query = """
@@ -155,9 +156,8 @@ class Driver():
           """
       params = (dni, name, surname, type_id, _id)
       self.cursor.execute(query, params)
-      if self.cursor.rowcount == 0:
-        return (False, {'error': 'No se ha podido realizar la actualización'})
       self.conn.commit()
+      print(self.cursor.rowcount)
       return (True, {'message':'Chofer actualizado correctamente'})
     except Exception as e:
       print("Error: {}".format(e))
