@@ -24,10 +24,20 @@ def totalRows():
 def get_driver_types():
   return controller.get_types()
 
+@driver_bp.route('/new', methods=['POST'])
+@jwt_required
+def add_drive():
+  return controller.add()
+
 @driver_bp.route('/update', methods=['POST'])
 @jwt_required
 def update_drive():
   return controller.update()
+
+@driver_bp.route('/delete', methods=['POST'])
+@jwt_required
+def delete_drive():
+  return controller.delete()
 
     
         

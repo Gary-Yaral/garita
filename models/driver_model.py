@@ -7,7 +7,6 @@ class Driver():
 
   def filter(self, per_page, current_page, filter):
     openConnection(self, MysqlDB)
-    print(per_page, current_page, filter)
     try:
       # Seleccionamos usando el filtro
       query = """
@@ -132,18 +131,26 @@ class Driver():
   def update(self, _id, dni, name, surname, type_id):
     openConnection(self, MysqlDB)
     try:
+      # Rescatamos la data para luego compararla
+      data = {
+        'dni':dni, 
+        'name':name, 
+        'surname': surname, 
+        'drive_type_id': type_id
+      }
       # Si ya existe la cedula y no pertenece al mismo chofer entonces retornamos error
       query = """SELECT * FROM driver WHERE dni = %s"""
       params = (dni,)
       self.cursor.execute(query, params)
       result = self.cursor.fetchall()
       isSameDriver = True
-      for drive in result:
-        if drive['id'] != _id:
-          isSameDriver = False
+      if len(result) > 0:
+        for drive in result:
+          if drive['id'] != _id:
+            isSameDriver = False
+      
       if isSameDriver == False:
         return (False, {'error': 'Ya existe un usuario con ese número de cedula'})
-      
       # Si la cedula pertenece al mismo chofer
       query = """
             UPDATE driver
@@ -156,9 +163,65 @@ class Driver():
           """
       params = (dni, name, surname, type_id, _id)
       self.cursor.execute(query, params)
-      self.conn.commit()
-      print(self.cursor.rowcount)
-      return (True, {'message':'Chofer actualizado correctamente'})
+      # Si los datos enviados on diferentes se actualizará
+      if self.cursor.rowcount > 0:
+        self.conn.commit()
+        return (True, {'message':'Chofer actualizado correctamente'})  
+      # Si no se actualiza verificamos que datos enviados sean iguales a los existentes
+      keys = list(data.keys())
+      totalKeys = len(keys)
+      counter = 0
+      for key in keys:
+        if str(data[key]) == str(result[0][key]):
+          counter = counter + 1
+      if totalKeys == counter:
+        return (True, {'message':'Chofer actualizado correctamente'})
+      # si se da un error al actualizar
+      return (False, {'message':'Ha ocurrido un error al actualizar el registro'})
+    except Exception as e:
+      print("Error: {}".format(e))
+    finally:
+      closeConnection(self)  
+
+  def addNew(self, dni, name, surname, type_id):
+    openConnection(self, MysqlDB)
+    try:
+      # Si ya existe la cedula en la bse datos entonces retornamos error
+      query = """SELECT * FROM driver WHERE dni = %s"""
+      params = (dni,)
+      self.cursor.execute(query, params)
+      result = self.cursor.fetchall()
+      if len(result) > 0:
+        return (False, {'error': 'Ya existe un usuario con ese número de cedula'})
+      
+      # Si la cedula no existe en la base de datos
+      query = """
+            INSERT INTO driver(dni, name, surname, drive_type_id)
+            VALUES(%s, %s, %s, %s)
+          """
+      params = (dni, name, surname, type_id,)
+      self.cursor.execute(query, params)
+      if self.cursor.rowcount > 0:
+        self.conn.commit()
+        return (True, {'message':'Chofer agregado correctamente'})
+      return (False, {'message':'Ha ocurrido un error al eliminar el registro'})
+    except Exception as e:
+      print("Error: {}".format(e))
+    finally:
+      closeConnection(self)  
+
+  def delete(self, _id):
+    openConnection(self, MysqlDB)
+    try:
+      # Si ya existe la cedula y no pertenece al mismo chofer entonces retornamos error
+      query = """DELETE FROM driver WHERE id = %s"""
+      params = (_id,)
+      self.cursor.execute(query, params)
+      if self.cursor.rowcount > 0:
+        self.conn.commit()
+        return (True, {'message':'Chofer eliminado correctamente'})
+      return (False, {'message':'Ha ocurrido un error al eliminar el registro'})
+        
     except Exception as e:
       print("Error: {}".format(e))
     finally:

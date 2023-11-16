@@ -41,12 +41,30 @@ def get_types():
 
 def update():
     data = request.json
-    print(data)
     _id = data.get('id')
     dni = data.get('dni')
     name = data.get('name')
     surname = data.get('surname')
     type_id = data.get('type_id')
-    """ return jsonify({'error': True, 'message': 'Datos no recibidos'}) """
+    if _id == None or dni == None or name == None or surname == None or type_id == None:
+        return jsonify({'error': True, 'message': 'Datos no recibidos'})
     result = drivers.update(_id, dni, name, surname, type_id)
+    return jsonify({'result':result})
+
+def add():
+    data = request.json
+    print(data)
+    dni = data.get('dni')
+    name = data.get('name')
+    surname = data.get('surname')
+    type_id = data.get('type_id')
+    """ return jsonify({'error': True, 'message': 'Datos no recibidos'}) """
+    result = drivers.addNew(dni, name, surname, type_id)
+    return jsonify({'result':result})
+
+def delete():
+    data = request.json
+    _id = data.get('id')
+    """ return jsonify({'error': True, 'message': 'Datos no recibidos'}) """
+    result = drivers.delete(_id)
     return jsonify({'result':result})
