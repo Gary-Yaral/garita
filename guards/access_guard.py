@@ -14,7 +14,6 @@ def jwt_required(func):
         try:
             # Decodificar el token y verificar la firma con la clave secreta
             token = token.split(" ")
-            print(token)
             if len(token) == 2: 
                 token = token[1]
             data = jwt.decode(token, current_app.secret_key, algorithms=['HS256'])

@@ -29,29 +29,22 @@ def get_status_types():
 def totalRows():
   return vehicle_controller.get_total_rows()
 
-""" @vehicle_bp.route('/filter', methods=['POST'])
-@jwt_required
-def filter_data():
-  return controller.get_filtered_data()
-
-
-
 @vehicle_bp.route('/new', methods=['POST'])
 @jwt_required
 def add_drive():
-  return controller.add()
+  return vehicle_controller.add()
 
 @vehicle_bp.route('/update', methods=['POST'])
 @jwt_required
 def update_drive():
-  return controller.update()
+  return vehicle_controller.update()
 
 @vehicle_bp.route('/delete', methods=['POST'])
 @jwt_required
 def delete_drive():
-  return controller.delete()
+  return vehicle_controller.delete()
 
-    
-        
-
- """
+@vehicle_bp.route('/filter', methods=['POST'])
+@jwt_required
+def filter_data():
+  return vehicle_controller.get_filtered_data() 

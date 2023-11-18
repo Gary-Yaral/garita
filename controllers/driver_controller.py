@@ -1,5 +1,4 @@
-from flask import current_app, jsonify, request
-from guards.access_guard import jwt_create
+from flask import jsonify, request
 from models.driver_model import DriverModel as drivers
 
 def get_page_data():
@@ -53,18 +52,19 @@ def update():
 
 def add():
     data = request.json
-    print(data)
     dni = data.get('dni')
     name = data.get('name')
     surname = data.get('surname')
     type_id = data.get('type_id')
-    """ return jsonify({'error': True, 'message': 'Datos no recibidos'}) """
+    if dni == None or name == None or surname == None or type_id == None:
+        return jsonify({'error': True, 'message': 'Datos no recibidos'})
     result = drivers.addNew(dni, name, surname, type_id)
     return jsonify({'result':result})
 
 def delete():
     data = request.json
     _id = data.get('id')
-    """ return jsonify({'error': True, 'message': 'Datos no recibidos'}) """
+    if _id == None:
+        return jsonify({'error': True, 'message': 'Datos no recibidos'})
     result = drivers.delete(_id)
     return jsonify({'result':result})

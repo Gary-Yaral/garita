@@ -204,7 +204,7 @@ class Driver():
       if self.cursor.rowcount > 0:
         self.conn.commit()
         return (True, {'message':'Chofer agregado correctamente'})
-      return (False, {'message':'Ha ocurrido un error al eliminar el registro'})
+      return (False, {'message':'Ha ocurrido un error al agregar el registro'})
     except Exception as e:
       print("Error: {}".format(e))
     finally:
