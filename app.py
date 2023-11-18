@@ -5,7 +5,7 @@ import pytesseract
 from config.env import secret_key, url_frontend
 from flask_cors import CORS
 from flask_socketio import SocketIO
-from routes import user, driver
+from routes import user, driver, vehicle
 
 
 app = Flask(__name__)
@@ -21,6 +21,7 @@ plate = Plate()
 
 app.register_blueprint(user.user_bp, url_prefix='/user')
 app.register_blueprint(driver.driver_bp, url_prefix='/driver')
+app.register_blueprint(vehicle.vehicle_bp, url_prefix='/vehicle')
 
 @app.route('/video_feed')
 def video_feed():
