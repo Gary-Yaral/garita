@@ -31,7 +31,6 @@ def get_page_data():
     current_page = data.get('current_page')
     # Si los datos no fueron enviados retornamos un error
     if per_page == None or current_page == None:
-        print('hola')
         return jsonify({'error': True, 'message': 'Datos no recibidos'})
     # Si los datos fueron enviados entonces consultamos todos los registros
     found_vehicles = vehicle.load(per_page, current_page)

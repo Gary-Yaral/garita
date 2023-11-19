@@ -20,6 +20,34 @@ class User():
     finally:
       closeConnection(self)
 
+  def load(self, per_page, current_page):
+    openConnection(self, MysqlDB)
+    try:
+      query = """
+          SELECT 
+          surname,
+          username,
+          password,
+          user.id As id,
+          user.name AS name,
+          fk_user_status_id AS user_status_id,
+          user_status.status_name AS user_status_name
+          FROM user
+          INNER JOIN user_status
+          ON user_status.user_status_id = user.fk_user_status_id 
+          LIMIT %s OFFSET %s; """
+      offset = (current_page - 1) * per_page
+      params = (per_page, offset)
+      self.cursor.execute(query, params)
+      result = self.cursor.fetchall()
+      if result == None:
+        return (False, None)
+      return (True, result)
+    except Exception as e:
+      print("Error: {}".format(e))
+    finally:
+      closeConnection(self)
+
   def find_user_status(self, status_id):
     openConnection(self, MysqlDB)
     try:

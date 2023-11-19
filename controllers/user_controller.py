@@ -68,4 +68,18 @@ def login_user():
     # Si no es super ni admin entonces tendrá rol de usuario
     session_data['data']['roles'] = (user_roles.USER,)
     return jsonify({'access': True, 'info': session_data})
-    
+
+# Carga los datos de la página actual de la tabla
+def get_page_data():
+    data = request.json
+    per_page = data.get('per_page')
+    current_page = data.get('current_page')
+    # Si los datos no fueron enviados retornamos un error
+    if per_page == None or current_page == None:
+        return jsonify({'error': True, 'message': 'Datos no recibidos'})
+    # Si los datos fueron enviados entonces consultamos todos los registros
+    found_vehicles = user.load(per_page, current_page)
+    # Si el usuario no fue encontrado retornamos un error
+    if found_vehicles == None:
+        return jsonify({'error': True, 'message': 'Error query'})
+    return jsonify({'result': found_vehicles})
