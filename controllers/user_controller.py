@@ -83,3 +83,12 @@ def get_page_data():
     if found_vehicles == None:
         return jsonify({'error': True, 'message': 'Error query'})
     return jsonify({'result': found_vehicles})
+
+# Funciones que cargan los datos del formulario 
+def get_status_types():
+    types = user.get_status_types()
+    return jsonify({'result':types})
+
+def get_total_rows():
+    counted = user.get_total()
+    return jsonify({'result':counted})

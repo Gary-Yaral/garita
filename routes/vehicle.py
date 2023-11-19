@@ -26,7 +26,7 @@ def get_status_types():
 
 @vehicle_bp.route('/total', methods=['POST'])
 @jwt_required
-def totalRows():
+def total_rows():
   return vehicle_controller.get_total_rows()
 
 @vehicle_bp.route('/new', methods=['POST'])

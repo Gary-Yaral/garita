@@ -11,6 +11,14 @@ def access():
 def load():
     return user_controller.get_page_data()
 
+@user_bp.route('/total', methods=["POST", "GET"])
+def total_rows():
+    return user_controller.get_total_rows()
+
+@user_bp.route('/types', methods=["POST", "GET"])
+def load_types():
+    return user_controller.get_status_types()
+
     
         
 

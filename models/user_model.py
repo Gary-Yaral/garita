@@ -25,9 +25,10 @@ class User():
     try:
       query = """
           SELECT 
+          dni,
           surname,
           username,
-          password,
+          '' AS password,
           user.id As id,
           user.name AS name,
           fk_user_status_id AS user_status_id,
@@ -40,6 +41,43 @@ class User():
       params = (per_page, offset)
       self.cursor.execute(query, params)
       result = self.cursor.fetchall()
+      if result == None:
+        return (False, None)
+      return (True, result)
+    except Exception as e:
+      print("Error: {}".format(e))
+    finally:
+      closeConnection(self)
+
+  def get_status_types(self):
+    openConnection(self, MysqlDB)
+    try:
+      query = """
+          SELECT 
+            user_status_id AS id,
+            status_name AS name
+          FROM user_status;
+          """
+      params = ()
+      self.cursor.execute(query, params)
+      result = self.cursor.fetchall()
+      if result == None:
+        return (False, None)
+      return (True, result)
+    except Exception as e:
+      print("Error: {}".format(e))
+    finally:
+      closeConnection(self)
+
+  def get_total(self):
+    openConnection(self, MysqlDB)
+    try:
+      query = """
+          SELECT COUNT(*) AS total FROM user;
+          """
+      params = ()
+      self.cursor.execute(query, params)
+      result = self.cursor.fetchone()
       if result == None:
         return (False, None)
       return (True, result)
