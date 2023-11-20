@@ -69,6 +69,22 @@ def login_user():
     session_data['data']['roles'] = (user_roles.USER,)
     return jsonify({'access': True, 'info': session_data})
 
+# Hace el filtrado segun un dato en enviaodo
+def get_filtered_data():
+    data = request.json
+    per_page = data.get('per_page')
+    current_page = data.get('current_page')
+    filter_text = data.get('filter')
+    # Si los datos no fueron enviados retornamos un error
+    if per_page == None or current_page == None or filter_text == None:
+        return jsonify({'error': True, 'message': 'Datos no recibidos'})
+    # Si los datos fueron enviados entonces filtramos los datos
+    found_data = user.filter(per_page, current_page, filter_text)
+    # Si el usuario no fue encontrado retornamos un error
+    if found_data == None:
+        return jsonify({'error': True, 'message': 'Error query'})
+    return jsonify({'result': found_data})
+
 # Carga los datos de la página actual de la tabla
 def get_page_data():
     data = request.json
@@ -92,3 +108,43 @@ def get_status_types():
 def get_total_rows():
     counted = user.get_total()
     return jsonify({'result':counted})
+
+
+# Funciones CRUD
+def add():
+    data = request.json
+    dni = data.get('dni') 
+    name = data.get('name') 
+    surname = data.get('surname') 
+    username = data.get('username') 
+    password = data.get('password') 
+    user_status_id = data.get('user_status_id')
+    if dni == None or name == None or username == None or surname == None or password == None or user_status_id == None:
+        return jsonify({'error': True, 'message': 'Datos no recibidos'})
+    result = user.addNew(dni, name, surname, username, password, user_status_id)
+    return jsonify({'result':result})
+
+def update():
+    data = request.json
+    _id = data.get('id')
+    dni = data.get('dni') 
+    name = data.get('name') 
+    surname = data.get('surname') 
+    username = data.get('username') 
+    password = data.get('password') 
+    user_status_id = data.get('user_status_id')
+    print(password)
+    if _id == None or dni == None or name == None or username == None or surname == None or password == None or user_status_id == None:
+        return jsonify({'error': True, 'message': 'Datos no recibidos'})
+    result = user.update(_id, dni, name, surname, username, password, user_status_id)
+    return jsonify({'result':result})
+
+
+
+def delete():
+    data = request.json
+    _id = data.get('id')
+    if _id == None:
+        return jsonify({'error': True, 'message': 'Datos no recibidos'})
+    result = user.delete(_id)
+    return jsonify({'result':result}) 
