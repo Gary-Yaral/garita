@@ -109,6 +109,9 @@ def get_total_rows():
     counted = user.get_total()
     return jsonify({'result':counted})
 
+def get_roles():
+    data = user.get_roles()
+    return jsonify({'result':data})
 
 # Funciones CRUD
 def add():
@@ -119,9 +122,10 @@ def add():
     username = data.get('username') 
     password = data.get('password') 
     user_status_id = data.get('user_status_id')
-    if dni == None or name == None or username == None or surname == None or password == None or user_status_id == None:
+    rol_id = data.get('rol_id')
+    if dni == None or name == None or username == None or surname == None or password == None or user_status_id == None or rol_id == None:
         return jsonify({'error': True, 'message': 'Datos no recibidos'})
-    result = user.addNew(dni, name, surname, username, password, user_status_id)
+    result = user.add_new(dni, name, surname, username, password, user_status_id, rol_id)
     return jsonify({'result':result})
 
 def update():
@@ -138,8 +142,6 @@ def update():
         return jsonify({'error': True, 'message': 'Datos no recibidos'})
     result = user.update(_id, dni, name, surname, username, password, user_status_id)
     return jsonify({'result':result})
-
-
 
 def delete():
     data = request.json

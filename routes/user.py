@@ -34,6 +34,10 @@ def load_types():
 def filter_data():
     return user_controller.get_filtered_data()
 
+@user_bp.route('/roles', methods=["POST", "GET"])
+def get_roles():
+    return user_controller.get_roles()
+
 
     
         

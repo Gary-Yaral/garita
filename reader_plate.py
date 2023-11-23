@@ -2,7 +2,6 @@ import cv2
 import pytesseract
 import imutils
 import numpy as np
-from find_in_db import findPlateInDB
 from plate_validator import Plate
 from models.vehicle_model import VehicleModel
 

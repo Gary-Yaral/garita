@@ -1,6 +1,11 @@
+import mysql.connector
 from db_config.mysql import MysqlDB
 from db_constants.common_functions import closeConnection, openConnection
 from pwd_md.pass_config import hash_password
+
+DEFAULT_ROL_ID = 2
+ADMIN_STATUS_ID = 3
+ADMIN_ROL_ID = 1
 
 class User():
   conn = None
@@ -33,10 +38,16 @@ class User():
           user.id As id,
           user.name AS name,
           fk_user_status_id AS user_status_id,
-          user_status.status_name AS user_status_name
+          user_status.status_name AS user_status_name,
+          rol_name,
+          rol_id
           FROM user
           INNER JOIN user_status
           ON user_status.user_status_id = user.fk_user_status_id 
+          INNER JOIN user_rol
+          ON user_rol.fk_user_id = user.id
+          INNER JOIN rol
+          ON user_rol.fk_rol_id = rol.rol_id
           LIMIT %s OFFSET %s; """
       offset = (current_page - 1) * per_page
       params = (per_page, offset)
@@ -57,7 +68,7 @@ class User():
           SELECT 
             user_status_id AS id,
             status_name AS name
-          FROM user_status;
+          FROM user_status
           """
       params = ()
       self.cursor.execute(query, params)
@@ -121,6 +132,7 @@ class User():
       closeConnection(self)
   
     # Métodos CRUD
+  
   def update(self, _id, dni, name, surname, username, password, status):
     openConnection(self, MysqlDB)
     try:
@@ -211,71 +223,50 @@ class User():
     finally:
       closeConnection(self)  
 
-  def addNew(self, dni, name, surname, username, password, status):
-    openConnection(self, MysqlDB)
-    try:
-      # Si ya existe la cedula en la bse datos entonces retornamos error
-      query = """SELECT * FROM user WHERE dni = %s"""
-      params = (dni,)
-      self.cursor.execute(query, params)
-      result = self.cursor.fetchall()
-      if len(result) > 0:
-        return (False, {'error': 'Ya existe un usuario con ese número de cédula'})
-      
-       # Si ya existe el nombre de usuario en la bse datos entonces retornamos error
-      query = """SELECT * FROM user WHERE username = %s"""
-      params = (username,)
-      self.cursor.execute(query, params)
-      result = self.cursor.fetchall()
-      if len(result) > 0:
-        return (False, {'error': 'Ya existe ese nombre de usuario'})
-      
-      # Agregmos solo si la cedula y el nombre de usuario no existen en la BD
-      query = """
-            INSERT INTO user(dni, name, surname, username, password, fk_user_status_id)
-            VALUES(%s, %s, %s, %s, %s, %s)
-          """
-      encryptedPass = hash_password(password)
-      params = (dni, name, surname, username, encryptedPass, status)
-      self.cursor.execute(query, params)
-      if self.cursor.rowcount > 0:
-        self.conn.commit()
-        return (True, {'message':'Usuario agregado correctamente'})
-      return (False, {'message':'Ha ocurrido un error al agregar el registro'})
-    except Exception as e:
-      print("Error: {}".format(e))
-    finally:
-      closeConnection(self)  
-
   def delete(self, _id):
     openConnection(self, MysqlDB)
     try:
-      # Si es el usuario super admin no podrá eliminarlo
-      query = """SELECT * FROM user_rol WHERE fk_user_id = %s"""
+      # mensaje satisfactorio
+      result_ok = (True, {'message':'Usuario eliminado correctamente'})
+      result_err = (False, {'message':'Ha ocurrido un error al eliminar el registro'})
+
+       # Verificamos que no sea administrador y lo eliminamos
+      query = """SELECT fk_rol_id AS rol_id FROM user_rol WHERE fk_user_id = %s"""
       params = (_id,)
       self.cursor.execute(query, params)
       result = self.cursor.fetchall()
       if len(result) > 0:
-        isAdmin = False
-        for data in result:
-          if data['fk_rol_id'] == 1:
-            isAdmin = True     
-        if isAdmin == True:
-          return (False, {'error': 'Usuario es administrador y no se puede borrar'})
-      
-      query = """DELETE FROM user WHERE id = %s"""
-      params = (_id,)
-      self.cursor.execute(query, params)
-      if self.cursor.rowcount > 0:
-        self.conn.commit()
-        return (True, {'message':'Usuario eliminado correctamente'})
-      return (False, {'message':'Ha ocurrido un error al eliminar el registro'})
+        if result[0]['rol_id'] != ADMIN_ROL_ID:
+          query = """DELETE FROM user WHERE id = %s"""
+          params = (_id,)
+          self.cursor.execute(query, params)
+          if self.cursor.rowcount > 0:
+            self.conn.commit()
+            return result_ok
+          return result_err
         
-    except Exception as e:
+      # Si es administrador verificamos que no sea el ultimo administrador
+      query = """SELECT * FROM user_rol WHERE fk_rol_id = %s"""
+      params = (ADMIN_ROL_ID,)
+      self.cursor.execute(query, params)
+      result = self.cursor.fetchall()
+      if len(result) > 1 :
+        query = """DELETE FROM user WHERE id = %s"""
+        params = (_id,)
+        self.cursor.execute(query, params)
+        if self.cursor.rowcount > 0:
+          self.conn.commit()
+          return result_ok
+        return result_err
+      
+      return (False, {'error': 'Este usuario es el único administrador y no se puede borrar'})
+        
+    except mysql.connector.Error as e:
       print("Error: {}".format(e))
+      if e.errno == 1451:
+        return (False, {'error':'No es posible eliminar el registro, tiene registros vinculados'})
     finally:
       closeConnection(self) 
-
   
   # Métodos para filtrar en el datatables
   def filter(self, per_page, current_page, filter):
@@ -291,23 +282,29 @@ class User():
           user.id As id,
           user.name AS name,
           fk_user_status_id AS user_status_id,
-          user_status.status_name AS user_status_name
+          user_status.status_name AS user_status_name,
+          rol_name,
+          rol_id
           FROM user
           INNER JOIN user_status
-          ON user_status.user_status_id = user.fk_user_status_id
+          ON user_status.user_status_id = user.fk_user_status_id 
+          INNER JOIN user_rol
+          ON user_rol.fk_user_id = user.id
+          INNER JOIN rol
+          ON rol.rol_id = user_rol.fk_rol_id
           WHERE
               user.dni LIKE CONCAT('%', %s , '%')
               OR user.name LIKE CONCAT('%', %s , '%')
               OR user.surname LIKE CONCAT('%', %s , '%')
               OR user.username LIKE CONCAT('%', %s, '%')
               OR user_status.status_name LIKE CONCAT('%', %s, '%')
+              OR rol.rol_name LIKE CONCAT('%', %s, '%')
           LIMIT %s OFFSET %s;
           """
       offset = (current_page - 1) * per_page
-      params = (filter, filter, filter, filter, filter, per_page, offset)
+      params = (filter, filter, filter, filter, filter, filter, per_page, offset)
       self.cursor.execute(query, params)
       result = self.cursor.fetchall()
-      print(result)
       if result == None:
         return (False, None)
       total = self.get_total_filtered(filter)
@@ -337,6 +334,85 @@ class User():
               OR user_status.status_name LIKE CONCAT('%', %s, '%');
           """
       params = (filter, filter, filter, filter, filter)
+      self.cursor.execute(query, params)
+      result = self.cursor.fetchall()
+      if result == None:
+        return (False, None)
+      return (True, result)
+    except Exception as e:
+      print("Error: {}".format(e))
+    finally:
+      closeConnection(self)
+
+  def add_new(self, dni, name, surname, username, password, status, rol_id):
+    openConnection(self, MysqlDB)
+    try:
+      # Si ya existe la cedula en la bse datos entonces retornamos error
+      query = """SELECT * FROM user WHERE dni = %s"""
+      params = (dni,)
+      self.cursor.execute(query, params)
+      result = self.cursor.fetchall()
+      if len(result) > 0:
+        return (False, {'error': 'Ya existe un usuario con ese número de cédula'})
+      
+       # Si ya existe el nombre de usuario en la bse datos entonces retornamos error
+      query = """SELECT * FROM user WHERE BINARY username = %s"""
+      params = (username,)
+      self.cursor.execute(query, params)
+      result = self.cursor.fetchall()
+      if len(result) > 0:
+        return (False, {'error': 'Ya existe ese nombre de usuario'})
+      
+      # Agregmos solo si la cedula y el nombre de usuario no existen en la BD
+      query = """
+            INSERT INTO user(dni, name, surname, username, password, fk_user_status_id)
+            VALUES(%s, %s, %s, %s, %s, %s)
+          """
+      encryptedPass = hash_password(password)
+      params = (dni, name, surname, username, encryptedPass, status)
+      self.cursor.execute(query, params)
+      if self.cursor.rowcount > 0:
+        self.conn.commit()
+        result = self.add_role(dni, rol_id)
+        if result[0] == True:
+          return (True, {'message':'Usuario agregado correctamente'})
+        return (False, {'message':'Ha ocurrido un error al agregar el rol al usuario'})
+      return (False, {'message':'Ha ocurrido un error al agregar el registro'})
+    except Exception as e:
+      print("Error: {}".format(e))
+    finally:
+      closeConnection(self)  
+
+  def add_role(self, dni, rol_id):
+    openConnection(self, MysqlDB)
+    try:
+      # Buscamos el usuario que se acaba de registrar con su dni
+      query = """SELECT * FROM user WHERE dni = %s"""
+      params = (dni,)
+      self.cursor.execute(query, params)
+      result = self.cursor.fetchall()
+      if len(result) > 0: 
+        user_id = result[0]["id"]
+        query = """INSERT INTO user_rol(fk_rol_id,
+          fk_user_id) VALUES(%s, %s)"""
+        params = (rol_id, user_id)
+        self.cursor.execute(query, params)
+        result = self.cursor.fetchall()      
+      if self.cursor.rowcount > 0:
+        self.conn.commit()
+        return (True, {'message':'Rol agregado correctamente al usuario'})
+      return (False, {'message':'Ha ocurrido un error al agregar el registro'})
+    except Exception as e:
+      print("Error: {}".format(e))
+    finally:
+      closeConnection(self)
+
+  def get_roles(self):
+    openConnection(self, MysqlDB)
+    try:
+      # Buscamos el usuario que se acaba de registrar con su dni
+      query = """SELECT rol_id AS id, rol_name AS name FROM rol"""
+      params = ()
       self.cursor.execute(query, params)
       result = self.cursor.fetchall()
       if result == None:
