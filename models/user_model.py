@@ -2,7 +2,7 @@ import mysql.connector
 from db_config.mysql import MysqlDB
 from pwd_md.pass_config import hash_password
 
-DEFAULT_ROL_ID = 2
+# Importante - Deben ser similar a los valores de la BD
 ENABLE_STATUS = 1
 ADMIN_ROL_ID = 1
 
@@ -574,5 +574,4 @@ class User():
     finally:
       cursor.close()
 
-  
 UserSystem = User()

@@ -52,6 +52,10 @@ def get_status_types():
     types = vehicle.get_status_types()
     return jsonify({'result':types})
 
+def get_formdata_required():
+    data = vehicle.load_required_data()
+    return jsonify({'result':data})
+
 def get_total_rows():
     counted = vehicle.get_total()
     return jsonify({'result':counted})

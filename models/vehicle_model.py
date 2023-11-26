@@ -63,16 +63,30 @@ class Vehicle():
       return (False, None)
     finally:
       cursor.close()
-
-  def get_access_types(self):
+  
+  # Funcion que hace la busqueda de la placa en la BD
+  def find_vehicle(self, plate_number):
     cursor = self.new_cursor()
     try:
       query = """
-          SELECT * FROM access_type;
-          """
-      params = ()
+          SELECT 
+            vehicles.id AS id, 
+            plate_number,
+            status_type_id,
+            access_type_id,
+            status_type_id,
+            vehicles_type.id AS vehicle_type_id
+          FROM vehicles
+          INNER JOIN vehicles_type
+          ON vehicles_type.id = vehicles.vehicle_type_id
+          INNER JOIN status_type
+          ON status_type.id = vehicles.status_type_id
+          INNER JOIN access_type
+          ON access_type.id = vehicles.access_type_id
+          WHERE vehicles.plate_number=%s"""
+      params = (plate_number,)
       cursor.execute(query, params)
-      result = cursor.fetchall()
+      result = cursor.fetchone()
       if result == None:
         return (False, None)
       return (True, result)
@@ -82,39 +96,81 @@ class Vehicle():
     finally:
       cursor.close()
 
-  def get_status_types(self):
+  def load_access_type(self):
     cursor = self.new_cursor()
     try:
       query = """
-          SELECT * FROM status_type;
-          """
-      params = ()
-      cursor.execute(query, params)
+          SELECT * from access_type
+            """
+      cursor.execute(query)
       result = cursor.fetchall()
       if result == None:
-        return (False, None)
-      return (True, result)
+        return {"loaded": False }
+      return {"loaded": True, "data": result}
     except Exception as e:
       print("Error: {}".format(e))
+      {"loaded": False }
     finally:
       cursor.close()
 
-  def get_vehicle_types(self):
+  def load_status_type(self):
     cursor = self.new_cursor()
     try:
       query = """
-          SELECT * FROM vehicles_type;
-          """
-      params = ()
-      cursor.execute(query, params)
+          SELECT * from status_type
+            """
+      cursor.execute(query)
       result = cursor.fetchall()
       if result == None:
-        return (False, None)
-      return (True, result)
+        {"loaded": False }
+      return {"loaded": True, "data": result}
     except Exception as e:
       print("Error: {}".format(e))
+      {"loaded": False }
     finally:
       cursor.close()
+
+  def load_vehicles_type(self):
+    cursor = self.new_cursor()
+    try:
+      query = """
+          SELECT * from vehicles_type
+            """
+      cursor.execute(query)
+      result = cursor.fetchall()
+      if result == None:
+        {"loaded": False }
+      return {"loaded": True, "data": result}
+    except Exception as e:
+      print("Error: {}".format(e))
+      {"loaded": False }
+    finally:
+      cursor.close()
+  
+  # Consulta datos para formulario de nuevo registro de accesso o salida
+  def load_required_data(self):
+    try:
+      access_types = self.load_access_type()
+      status_types = self.load_status_type()
+      vehicles_types = self.load_vehicles_type()
+      data = {
+        "vehicles_types": (),
+        "status_types": (),
+        "access_types": ()
+      } 
+      if access_types["loaded"]:
+        data["access_types"] = access_types["data"]
+      
+      if status_types["loaded"]:
+        data["status_types"] = status_types["data"]
+
+      if vehicles_types["loaded"]:
+        data["vehicles_types"] = vehicles_types["data"]
+
+      return (True, data)
+    except Exception as e:
+      print("Error: {}".format(e))
+      return (False, None)
 
   # Métodos CRUD
   def update(self, _id, plate_number, access_type_id, vehicle_type_id, status_type_id):
@@ -262,7 +318,6 @@ class Vehicle():
     finally:
       cursor.close()
       
-
   # Obtiene el total de registro que trae el filtro
   def get_total_filtered(self, filter):
     cursor = self.new_cursor()

@@ -48,3 +48,8 @@ def delete_drive():
 @jwt_required
 def filter_data():
   return vehicle_controller.get_filtered_data() 
+
+@vehicle_bp.route('/data-form', methods=['GET'])
+@jwt_required
+def required_data():
+  return vehicle_controller.get_formdata_required() 

@@ -28,13 +28,14 @@ def login_user():
         return jsonify({'error': True, 'message': 'Usuario deshabilitado, comuniquese con el administrador'})
     # Obtenemos todos los roles que tiene ese usuario
     roles_data = user.get_user_roles(found_user['id'])
-    print(roles_data)
     if len(roles_data) > 0:
         roles = (roles_data[0]['rol_name'],)
 
     # Eliminamos datos privados antes de crear el token
     del found_user['username']
     del found_user['password']
+    del found_user['id']
+    del found_user['dni']
     del found_user['fk_user_status_id']
     # Generamos el token que se usará para las peticiones
     token = jwt_create({
