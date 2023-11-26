@@ -7,9 +7,3 @@ mysql_config = {
     "password": "",
     "database": "guard_booth"
 }
-
-user_status = {
-  "habilitado": "habilitado",
-  "deshabilitado": "deshabilitado",
-  "permanente": "permanente"
-}
