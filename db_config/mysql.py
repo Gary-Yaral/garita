@@ -28,3 +28,4 @@ class MysqlDB:
             except mysql.connector.Error as e:
                 print(f"Error closing connections: {e}")
 
+conn = MysqlDB().connect()

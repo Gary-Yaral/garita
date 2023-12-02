@@ -1,14 +1,14 @@
-from flask import Flask, jsonify, g
+from flask import Flask, jsonify
 import pytesseract
-from config.env import secret_key, url_frontend
+from config.env import secret_key
 from flask_cors import CORS
-from routes import user, driver, vehicle
+from routes import user, driver, vehicle, excel
 from db_config.mysql import MysqlDB
 
 app = Flask(__name__)
 
 app.secret_key = secret_key
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app, resources={r"/*": {"origins": "*"}}, expose_headers=["Content-Disposition"])
 
 # Configuración de la ubicación de Tesseract OCR
 pytesseract.pytesseract.tesseract_cmd = r'C:\Users\Hp\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
@@ -17,6 +17,7 @@ config = '--psm 1'
 app.register_blueprint(user.user_bp, url_prefix='/user')
 app.register_blueprint(driver.driver_bp, url_prefix='/driver')
 app.register_blueprint(vehicle.vehicle_bp, url_prefix='/vehicle')
+app.register_blueprint(excel.excel_bp, url_prefix='/excel')
 
 @app.teardown_appcontext
 def close_db_connection(exception=None):

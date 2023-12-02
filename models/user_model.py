@@ -1,5 +1,5 @@
 import mysql.connector
-from db_config.mysql import MysqlDB
+from db_config.mysql import conn
 from pwd_md.pass_config import hash_password
 
 # Importante - Deben ser similar a los valores de la BD
@@ -11,8 +11,7 @@ class User():
   cursor = None
 
   def __init__(self,):
-    db = MysqlDB()
-    self.conn = db.connect()
+    self.conn = conn
   
   def new_cursor(self):
     return self.conn.cursor(dictionary=True)
@@ -83,7 +82,7 @@ class User():
       if result == None:
         return (False, None)
       return (True, result)
-    except Exception as e:
+    except mysql.connector.Exception as e:
       print("Error: {}".format(e))
     finally:
       cursor.close()

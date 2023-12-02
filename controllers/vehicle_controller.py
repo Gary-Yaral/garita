@@ -74,7 +74,6 @@ def add():
 
 def update():
     data = request.json
-    print(data)
     _id = data.get('id')
     plate_number = data.get('plate_number') 
     access_type_id = data.get('access_type_id') 

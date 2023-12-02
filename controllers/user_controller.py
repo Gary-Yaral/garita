@@ -24,7 +24,7 @@ def login_user():
         return jsonify({'error': True, 'message': 'Usuario o contraseña incorrectos'})
     # Si el usuario está deshabilitado devolvemos un error
     status = user.find_user_status(found_user['fk_user_status_id'])
-    if status == user_status.DISABLED: 
+    if status['status_name'].lower() == user_status.DISABLED: 
         return jsonify({'error': True, 'message': 'Usuario deshabilitado, comuniquese con el administrador'})
     # Obtenemos todos los roles que tiene ese usuario
     roles_data = user.get_user_roles(found_user['id'])

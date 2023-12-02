@@ -1,4 +1,4 @@
-from db_config.mysql import MysqlDB
+from db_config.mysql import conn
 import mysql.connector
 
 class Driver():
@@ -6,8 +6,7 @@ class Driver():
   cursor = None
 
   def __init__(self,):
-    db = MysqlDB()
-    self.conn = db.connect()
+    self.conn = conn
 
   def new_cursor(self):
     return self.conn.cursor(dictionary=True)

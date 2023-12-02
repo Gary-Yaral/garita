@@ -1,12 +1,11 @@
-from db_config.mysql import MysqlDB
+from db_config.mysql import conn
 
 class Vehicle():
   conn = None
   cursor = None
 
   def __init__(self,):
-    db = MysqlDB()
-    self.conn = db.connect()
+    self.conn = conn
 
   def new_cursor(self):
     return self.conn.cursor(dictionary=True)
