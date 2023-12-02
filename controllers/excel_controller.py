@@ -29,8 +29,6 @@ def generate_excel():
       worksheet.set_column(0, len(data[0]) - 1, 20)
       # Formato para centrado vertical y horizontal en la primera celda de cada fila
       center_format = workbook.add_format({'align': 'center', 'valign': 'vcenter'})
-      # Formato para alineación a la izquierda para el resto de las celdas
-      left_align_format = workbook.add_format({'align': 'left', 'valign': 'vcenter'})
 
       # Escribir los datos y aplicar formato a las celdas
       for i, row in enumerate(data):
