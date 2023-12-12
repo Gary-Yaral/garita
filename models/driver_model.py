@@ -36,7 +36,7 @@ class Driver():
       params = (filter, filter, filter, filter, per_page, offset)
       cursor.execute(query, params)
       result = cursor.fetchall()
-      if result == None:
+      if not result:
         return (False, None)
       total = self.get_total_filtered(filter)
       if total[0] == True:
@@ -65,7 +65,7 @@ class Driver():
       params = (filter, filter, filter, filter)
       cursor.execute(query, params)
       result = cursor.fetchall()
-      if result == None:
+      if not result:
         return (False, None)
       return (True, result)
     except Exception as e:
@@ -92,7 +92,7 @@ class Driver():
       params = (per_page, offset)
       cursor.execute(query, params)
       result = cursor.fetchall()
-      if result == None:
+      if not result:
         return (False, None)
       return (True, result)
     except Exception as e:
@@ -109,7 +109,7 @@ class Driver():
       params = ()
       cursor.execute(query, params)
       result = cursor.fetchone()
-      if result == None:
+      if not result:
         return (False, None)
       return (True, result)
     except Exception as e:
@@ -126,7 +126,7 @@ class Driver():
       params = ()
       cursor.execute(query, params)
       result = cursor.fetchall()
-      if result == None:
+      if not result:
         return (False, None)
       return (True, result)
     except mysql.connector.Error as e:
@@ -230,6 +230,34 @@ class Driver():
         
     except Exception as e:
       print("Error: {}".format(e)) 
+    finally:
+      cursor.close()
+
+  def find_driver(self, dni):
+    cursor = self.new_cursor()
+    try:
+      # Si ya existe la cedula y no pertenece al mismo chofer entonces retornamos error
+      query = """
+          SELECT 
+            driver.id AS id, dni, 
+            driver.drive_type_id AS type_id, 
+            driver.name AS name, 
+            driver_type.name AS type,
+            surname
+          FROM driver
+          INNER JOIN driver_type
+          ON driver_type.id = driver.drive_type_id
+          WHERE dni = %s;
+          """
+      params = (dni,)
+      cursor.execute(query, params)
+      result = cursor.fetchone()
+      if not result:
+        return (False, None)
+      return (True, result)
+    except Exception as e:
+      print("Error: {}".format(e)) 
+      return (False, None)
     finally:
       cursor.close()
 

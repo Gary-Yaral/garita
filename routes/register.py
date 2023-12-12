@@ -39,6 +39,16 @@ def update_drive():
 def delete_drive():
   return register_controller.delete()
 
+@register_bp.route('/home-arrival-data', methods=['GET'])
+@jwt_required
+def get_home_arrival_data():
+  return register_controller.get_home_arrival_data()
+
+@register_bp.route('/home-exit-data', methods=['GET'])
+@jwt_required
+def get_home_exit_data():
+  return register_controller.get_home_exit_data()
+
     
         
 

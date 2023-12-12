@@ -44,6 +44,11 @@ def update_drive():
 def delete_drive():
   return vehicle_controller.delete()
 
+@vehicle_bp.route('/find', methods=['POST'])
+@jwt_required
+def find_plate():
+  return vehicle_controller.find_plate() 
+
 @vehicle_bp.route('/filter', methods=['POST'])
 @jwt_required
 def filter_data():

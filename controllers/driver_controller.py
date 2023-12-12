@@ -68,3 +68,11 @@ def delete():
         return jsonify({'error': True, 'message': 'Datos no recibidos'})
     result = drivers.delete(_id)
     return jsonify({'result':result})
+
+def find_driver():
+    data = request.json
+    dni = data.get('dni')
+    if not dni:
+        return jsonify({'error': True, 'message': 'Datos no recibidos'})
+    result = drivers.find_driver(dni)
+    return jsonify({'result':result})

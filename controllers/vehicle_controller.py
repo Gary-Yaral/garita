@@ -2,11 +2,13 @@ from flask import jsonify, request
 from models.vehicle_model import VehicleModel as vehicle
 
 # Permite a la cámara buscar la placa detectada 
-def found_plate():
+def find_plate():
     data = request.json
     plate_number = data.get('plate_number')
-    
-    return jsonify({'access': True, 'info': plate_number})
+    if not plate_number: 
+        return jsonify({'error': True, 'message': 'Datos no recibidos'})
+    result = vehicle.find_vehicle(plate_number)
+    return jsonify({'result': result})
 
 # Hace el filtrado segun un dato en enviaodo
 def get_filtered_data():

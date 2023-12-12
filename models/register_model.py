@@ -36,7 +36,7 @@ class Register():
       params = (filter, filter, filter, filter, per_page, offset)
       cursor.execute(query, params)
       result = cursor.fetchall()
-      if result == None:
+      if not result:
         return (False, None)
       total = self.get_total_filtered(filter)
       if total[0] == True:
@@ -65,7 +65,7 @@ class Register():
       params = (filter, filter, filter, filter)
       cursor.execute(query, params)
       result = cursor.fetchall()
-      if result == None:
+      if not result:
         return (False, None)
       return (True, result)
     except Exception as e:
@@ -92,7 +92,7 @@ class Register():
       params = (per_page, offset)
       cursor.execute(query, params)
       result = cursor.fetchall()
-      if result == None:
+      if not result:
         return (False, None)
       return (True, result)
     except Exception as e:
@@ -109,7 +109,7 @@ class Register():
       params = ()
       cursor.execute(query, params)
       result = cursor.fetchone()
-      if result == None:
+      if not result:
         return (False, None)
       return (True, result)
     except Exception as e:
@@ -126,7 +126,7 @@ class Register():
       params = ()
       cursor.execute(query, params)
       result = cursor.fetchall()
-      if result == None:
+      if not result:
         return (False, None)
       return (True, result)
     except mysql.connector.Error as e:
@@ -230,6 +230,62 @@ class Register():
         
     except Exception as e:
       print("Error: {}".format(e)) 
+    finally:
+      cursor.close()
+
+  def get_home_arrival_data(self):
+    cursor = self.new_cursor()
+    try:
+      # Si ya existe la cedula y no pertenece al mismo chofer entonces retornamos error
+      query = """
+        SELECT vt.name, COALESCE(COUNT(acr.vehicle_id), 0) AS total
+        FROM vehicles_type AS vt
+        LEFT JOIN (
+            SELECT v.vehicle_type_id, acr.vehicle_id
+            FROM access_register AS acr
+            INNER JOIN vehicles AS v ON v.id = acr.vehicle_id
+            WHERE DATE(acr.arrival_time) = DATE(CURRENT_TIMESTAMP())
+        ) AS acr ON vt.id = acr.vehicle_type_id
+        GROUP BY vt.name;"""
+      
+      
+      params = ()
+      cursor.execute(query, params)
+      result = cursor.fetchall()
+      if result: 
+        return (True, result)
+      return (False, None)
+    except Exception as e:
+      print("Error: {}".format(e)) 
+      return (False, None)
+    finally:
+      cursor.close()
+
+  def get_home_exit_data(self):
+    cursor = self.new_cursor()
+    try:
+      # Si ya existe la cedula y no pertenece al mismo chofer entonces retornamos error
+      query = """
+        SELECT vt.name, COALESCE(COUNT(acr.vehicle_id), 0) AS total
+        FROM vehicles_type AS vt
+        LEFT JOIN (
+            SELECT v.vehicle_type_id, acr.vehicle_id
+            FROM access_register AS acr
+            INNER JOIN vehicles AS v ON v.id = acr.vehicle_id
+            WHERE DATE(acr.exit_time) = DATE(CURRENT_TIMESTAMP())
+        ) AS acr ON vt.id = acr.vehicle_type_id
+        GROUP BY vt.name;"""
+      
+      
+      params = ()
+      cursor.execute(query, params)
+      result = cursor.fetchall()
+      if result: 
+        return (True, result)
+      return (False, None)
+    except Exception as e:
+      print("Error: {}".format(e)) 
+      return (False, None)
     finally:
       cursor.close()
 

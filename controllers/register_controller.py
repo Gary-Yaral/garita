@@ -68,3 +68,11 @@ def delete():
         return jsonify({'error': True, 'message': 'Datos no recibidos'})
     result = registers.delete(_id)
     return jsonify({'result':result})
+
+def get_home_arrival_data():
+    result = registers.get_home_arrival_data()
+    return jsonify({'result':result})
+
+def get_home_exit_data():
+    result = registers.get_home_exit_data()
+    return jsonify({'result':result})

@@ -59,7 +59,7 @@ class User():
       params = (per_page, offset)
       cursor.execute(query, params)
       result = cursor.fetchall()
-      if result == None:
+      if not result:
         return (False, None)
       return (True, result)
     except Exception as e:
@@ -79,7 +79,7 @@ class User():
       params = ()
       cursor.execute(query, params)
       result = cursor.fetchall()
-      if result == None:
+      if not result:
         return (False, None)
       return (True, result)
     except mysql.connector.Exception as e:
@@ -96,7 +96,7 @@ class User():
       params = ()
       cursor.execute(query, params)
       result = cursor.fetchone()
-      if result == None:
+      if not result:
         return (False, None)
       return (True, result)
     except Exception as e:
@@ -260,7 +260,7 @@ class User():
       params = (filter, filter, filter, filter, filter, filter, per_page, offset)
       cursor.execute(query, params)
       result = cursor.fetchall()
-      if result == None:
+      if not result:
         return (False, None)
       total = self.get_total_filtered(filter)
       if total[0] == True:
@@ -291,7 +291,7 @@ class User():
       params = (filter, filter, filter, filter, filter)
       cursor.execute(query, params)
       result = cursor.fetchall()
-      if result == None:
+      if not result:
         return (False, None)
       return (True, result)
     except Exception as e:
@@ -372,7 +372,7 @@ class User():
       params = ()
       cursor.execute(query, params)
       result = cursor.fetchall()
-      if result == None:
+      if not result:
         return (False, None)
       return (True, result)
     except Exception as e:

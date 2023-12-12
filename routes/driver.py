@@ -39,6 +39,11 @@ def update_drive():
 def delete_drive():
   return controller.delete()
 
+@driver_bp.route('/find', methods=['POST'])
+@jwt_required
+def find_driver():
+  return controller.find_driver()
+
     
         
 

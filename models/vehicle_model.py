@@ -36,7 +36,7 @@ class Vehicle():
       params = (per_page, offset)
       cursor.execute(query, params)
       result = cursor.fetchall()
-      if result == None:
+      if not result:
         return (False, None)
       return (True, result)
     except Exception as e:
@@ -54,7 +54,7 @@ class Vehicle():
       params = ()
       cursor.execute(query, params)
       result = cursor.fetchone()
-      if result == None:
+      if not result:
         return (False, None)
       return (True, result)
     except Exception as e:
@@ -72,6 +72,9 @@ class Vehicle():
             vehicles.id AS id, 
             plate_number,
             status_type_id,
+            access_type.name AS access_type_name,
+            status_type.name AS status_type_name,
+            vehicles_type.name AS vehicle_type_name,
             access_type_id,
             status_type_id,
             vehicles_type.id AS vehicle_type_id
@@ -86,7 +89,7 @@ class Vehicle():
       params = (plate_number,)
       cursor.execute(query, params)
       result = cursor.fetchone()
-      if result == None:
+      if not result:
         return (False, None)
       return (True, result)
     except Exception as e:
@@ -103,7 +106,7 @@ class Vehicle():
             """
       cursor.execute(query)
       result = cursor.fetchall()
-      if result == None:
+      if not result:
         return {"loaded": False }
       return {"loaded": True, "data": result}
     except Exception as e:
@@ -120,7 +123,7 @@ class Vehicle():
             """
       cursor.execute(query)
       result = cursor.fetchall()
-      if result == None:
+      if not result:
         {"loaded": False }
       return {"loaded": True, "data": result}
     except Exception as e:
@@ -137,7 +140,7 @@ class Vehicle():
             """
       cursor.execute(query)
       result = cursor.fetchall()
-      if result == None:
+      if not result:
         {"loaded": False }
       return {"loaded": True, "data": result}
     except Exception as e:
@@ -305,7 +308,7 @@ class Vehicle():
       params = (filter, filter, filter, filter, per_page, offset)
       cursor.execute(query, params)
       result = cursor.fetchall()
-      if result == None:
+      if not result:
         return (False, None)
       total = self.get_total_filtered(filter)
       if total[0] == True:
@@ -340,7 +343,7 @@ class Vehicle():
       params = (filter, filter, filter, filter)
       cursor.execute(query, params)
       result = cursor.fetchall()
-      if result == None:
+      if not result:
         return (False, None)
       return (True, result)
     except Exception as e:
