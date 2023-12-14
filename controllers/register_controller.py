@@ -50,15 +50,20 @@ def update():
     result = registers.update(_id, dni, name, surname, type_id)
     return jsonify({'result':result})
 
-def add():
-    data = request.json
-    dni = data.get('dni')
-    name = data.get('name')
-    surname = data.get('surname')
-    type_id = data.get('type_id')
-    if dni == None or name == None or surname == None or type_id == None:
+def add(data):
+    form = request.json
+    vehicle_id = form.get('vehicle_id')
+    driver_id = form.get('driver_id')
+    user_id = data['data']['user']['id']
+    print('id: ', user_id)
+    status_type_id = form.get('status_type_id')
+    kms = form.get('kms')
+    destiny = form.get('destiny')
+    observation = form.get('observation')
+    print(driver_id, vehicle_id, user_id, kms, destiny, observation, status_type_id)
+    if not vehicle_id :
         return jsonify({'error': True, 'message': 'Datos no recibidos'})
-    result = registers.addNew(dni, name, surname, type_id)
+    result = registers.addNew(driver_id, vehicle_id, user_id, kms, destiny, observation, status_type_id)
     return jsonify({'result':result})
 
 def delete():

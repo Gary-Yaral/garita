@@ -34,7 +34,6 @@ def login_user():
     # Eliminamos datos privados antes de crear el token
     del found_user['username']
     del found_user['password']
-    del found_user['id']
     del found_user['dni']
     del found_user['fk_user_status_id']
     # Generamos el token que se usará para las peticiones
@@ -46,6 +45,7 @@ def login_user():
     }, current_app.secret_key)
 
     # Creamos la sesion que devolveremos
+    del found_user['id']
     session_data =  {
         'data':{
             'user':found_user,

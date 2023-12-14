@@ -26,8 +26,8 @@ def get_driver_types():
 
 @register_bp.route('/new', methods=['POST'])
 @jwt_required
-def add_drive():
-  return register_controller.add()
+def add_register(data):
+  return register_controller.add(data)
 
 @register_bp.route('/update', methods=['POST'])
 @jwt_required

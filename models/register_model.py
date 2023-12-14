@@ -1,5 +1,6 @@
 from db_config.mysql import conn
 import mysql.connector
+from db_constants.global_constants import VehicleStatus, RegisterType
 
 class Register():
   conn = None
@@ -78,14 +79,30 @@ class Register():
     try:
       query = """
           SELECT 
-            driver.id AS id, dni, 
-            driver.drive_type_id AS type_id, 
-            driver.name AS name, 
-            driver_type.name AS type,
-            surname
-          FROM driver
-          INNER JOIN driver_type
-          ON driver_type.id = driver.drive_type_id
+            driver.dni,
+            CONCAT(driver.name, ' ', driver.surname) AS driver_name,
+            CONCAT(us.name, ' ', us.surname) AS username,
+            vehicles.plate_number AS plate_number,
+            atype.name AS access_type,
+            rt.name AS register_type,
+            vt.name AS vehicle_type,
+            ar.kms,
+            ar.observation,
+            ar.destiny,
+            ar.current_time AS registered_date
+          FROM access_register AS ar
+          INNER JOIN driver
+          ON driver.id = ar.driver_id
+          INNER JOIN vehicles
+          ON vehicles.id = ar.vehicle_id
+          INNER JOIN access_type AS atype
+          ON atype.id = vehicles.access_type_id
+          INNER JOIN `user` AS us
+          ON us.id = ar.user_id
+          INNER JOIN register_type AS rt
+          ON rt.id = ar.register_type_id
+          INNER JOIN vehicles_type AS vt
+          ON vt.id = vehicles.vehicle_type_id
           LIMIT %s OFFSET %s;
           """
       offset = (current_page - 1) * per_page
@@ -189,30 +206,39 @@ class Register():
     finally:
       cursor.close()
 
-  def addNew(self, dni, name, surname, type_id):
+  def addNew(self, driver_id, vehicle_id, user_id, kms, destiny, observation, status_type_id):
     cursor = self.new_cursor()
+    print(VehicleStatus.DENTRO)
     try:
-      # Si ya existe la cedula en la bse datos entonces retornamos error
-      query = """SELECT * FROM driver WHERE dni = %s"""
-      params = (dni,)
-      cursor.execute(query, params)
-      result = cursor.fetchall()
-      if len(result) > 0:
-        return (False, {'error': 'Ya existe un usuario con ese número de cedula'})
-      
-      # Si la cedula no existe en la base de datos
       query = """
-            INSERT INTO driver(dni, name, surname, drive_type_id)
-            VALUES(%s, %s, %s, %s)
-          """
-      params = (dni, name, surname, type_id,)
+        INSERT INTO access_register(
+          driver_id, 
+          vehicle_id, 
+          user_id,
+          kms,
+          destiny,
+          observation,
+          register_type_id
+        ) VALUES(%s, %s, %s, %s, %s, %s, %s)
+        """
+      params = ()
+      register_type_id = 0
+      if status_type_id == VehicleStatus.DENTRO:
+        register_type_id = RegisterType.SALIDA
+      
+      if status_type_id == VehicleStatus.FUERA:
+        register_type_id = RegisterType.SALIDA
+        return (True, "va a ingresar")
+      
+      params = (driver_id, vehicle_id, user_id, kms, destiny, observation, register_type_id)
       cursor.execute(query, params)
       if cursor.rowcount > 0:
         self.conn.commit()
-        return (True, {'message':'Chofer agregado correctamente'})
+        return (True, {'message':'Registro agregado correctamente'})
       return (False, {'message':'Ha ocurrido un error al agregar el registro'})
     except Exception as e:
       print("Error: {}".format(e))
+      return (False, {'error':'Ha ocurrido un error al agregar el registro'})
     finally:
       cursor.close()
 
