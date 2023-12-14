@@ -25,24 +25,27 @@ CREATE TABLE `access_register` (
   `driver_id` int(11) NOT NULL,
   `vehicle_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
-  `arrival time` datetime NOT NULL DEFAULT current_timestamp(),
-  `exit_time` datetime NOT NULL DEFAULT current_timestamp(),
-  `arrival_km` double DEFAULT NULL,
-  `exit_km` double DEFAULT NULL,
+  `kms` varchar(50) DEFAULT NULL,
   `destiny` varchar(200) DEFAULT NULL,
   `observation` varchar(200) DEFAULT NULL,
+  `register_type_id` int(11) NOT NULL,
+  `current_time` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
-  KEY `user_id` (`user_id`),
+  KEY `register_type_id` (`register_type_id`),
   KEY `access_register_ibfk_1` (`driver_id`),
   KEY `access_register_ibfk_2` (`vehicle_id`),
+  KEY `access_register_ibfk_3` (`user_id`),
   CONSTRAINT `access_register_ibfk_1` FOREIGN KEY (`driver_id`) REFERENCES `driver` (`id`) ON UPDATE CASCADE,
   CONSTRAINT `access_register_ibfk_2` FOREIGN KEY (`vehicle_id`) REFERENCES `vehicles` (`id`) ON UPDATE CASCADE,
-  CONSTRAINT `access_register_ibfk_3` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  CONSTRAINT `access_register_ibfk_3` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON UPDATE CASCADE,
+  CONSTRAINT `access_register_ibfk_4` FOREIGN KEY (`register_type_id`) REFERENCES `register_type` (`id`) ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4;
 
 /*Data for the table `access_register` */
 
 LOCK TABLES `access_register` WRITE;
+
+insert  into `access_register`(`id`,`driver_id`,`vehicle_id`,`user_id`,`kms`,`destiny`,`observation`,`register_type_id`,`current_time`) values (6,13,2,10,'','','',2,'2023-12-13 18:55:47'),(7,13,1,10,'34','Mi casa','Ninguna',2,'2023-12-13 18:58:23');
 
 UNLOCK TABLES;
 
@@ -60,7 +63,7 @@ CREATE TABLE `access_type` (
 
 LOCK TABLES `access_type` WRITE;
 
-insert  into `access_type`(`id`,`name`) values (1,'regular'),(2,'invitado');
+insert  into `access_type`(`id`,`name`) values (1,'Regular'),(2,'Invitado');
 
 UNLOCK TABLES;
 
@@ -77,11 +80,13 @@ CREATE TABLE `driver` (
   PRIMARY KEY (`id`),
   KEY `drive_type_id` (`drive_type_id`),
   CONSTRAINT `driver_ibfk_1` FOREIGN KEY (`drive_type_id`) REFERENCES `driver_type` (`id`) ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4;
 
 /*Data for the table `driver` */
 
 LOCK TABLES `driver` WRITE;
+
+insert  into `driver`(`id`,`dni`,`name`,`surname`,`drive_type_id`) values (2,'1243545462','Adrian Flores','Barba',2),(4,'1335454664','Flavia Maria','Contreras',3),(5,'1457686861','Marcos','Andrade',4),(6,'1465757753','Diana','Arboleda',5),(7,'1233578754','Gustavo Mario','Mora Litardo',3),(8,'1247658659','Hugo','Torres',4),(10,'1567645443','Julio','Nagua',4),(13,'1345464653','Oliver Andrés','Atom Mirana',1),(14,'1358684742','Amalia Mirai','Gonzales Plata',1),(17,'1555254596','Olivia Maria','Gonzales',4);
 
 UNLOCK TABLES;
 
@@ -99,7 +104,25 @@ CREATE TABLE `driver_type` (
 
 LOCK TABLES `driver_type` WRITE;
 
-insert  into `driver_type`(`id`,`name`) values (1,'estudiante'),(2,'docente'),(3,'administrativo'),(4,'militar'),(5,'particular');
+insert  into `driver_type`(`id`,`name`) values (1,'Estudiante'),(2,'Docente'),(3,'Administrativo'),(4,'Militar'),(5,'Particular');
+
+UNLOCK TABLES;
+
+/*Table structure for table `register_type` */
+
+DROP TABLE IF EXISTS `register_type`;
+
+CREATE TABLE `register_type` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;
+
+/*Data for the table `register_type` */
+
+LOCK TABLES `register_type` WRITE;
+
+insert  into `register_type`(`id`,`name`) values (1,'Entrada'),(2,'Salida');
 
 UNLOCK TABLES;
 
@@ -117,7 +140,7 @@ CREATE TABLE `rol` (
 
 LOCK TABLES `rol` WRITE;
 
-insert  into `rol`(`rol_id`,`rol_name`) values (1,'super'),(2,'administrador'),(3,'usuario');
+insert  into `rol`(`rol_id`,`rol_name`) values (1,'administrador'),(2,'usuario');
 
 UNLOCK TABLES;
 
@@ -135,7 +158,7 @@ CREATE TABLE `status_type` (
 
 LOCK TABLES `status_type` WRITE;
 
-insert  into `status_type`(`id`,`name`) values (1,'INGRESO'),(2,'SALIDA');
+insert  into `status_type`(`id`,`name`) values (1,'Dentro'),(2,'Fuera');
 
 UNLOCK TABLES;
 
@@ -154,13 +177,13 @@ CREATE TABLE `user` (
   PRIMARY KEY (`id`),
   KEY `fk_user_status_id` (`fk_user_status_id`),
   CONSTRAINT `user_ibfk_1` FOREIGN KEY (`fk_user_status_id`) REFERENCES `user_status` (`user_status_id`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4;
 
 /*Data for the table `user` */
 
 LOCK TABLES `user` WRITE;
 
-insert  into `user`(`id`,`dni`,`name`,`surname`,`username`,`password`,`fk_user_status_id`) values (1,'0000000000','Super','Admin','G4r1t4_2xx3','$2b$12$Cureq7STeHlTGDC.DuWHD.Jj1EBHC28x1j4Thsj2cWS6coU6TMKri',3),(2,'0000000001','Admin','System','ECu4d0r_2xx3','$2b$12$RJVEdhLO4CdmRgFZEOwntOS3vqdFBFyvQ2QGdOWJjmELSJrexncly',1),(3,'0000000002','Guardia','Seguridad','S3cUrity_Eye','$2b$12$QoTA/UpJPrkWr/PsP0ETn.Wd39iyN0wFL7kZDvUFKCml6YhDgIJ7y',1);
+insert  into `user`(`id`,`dni`,`name`,`surname`,`username`,`password`,`fk_user_status_id`) values (10,'1345464653','Usuario','Administrador','Miusuario_2023','$2b$12$yFm8Mse8rsZl9OijXnYG8uzZAvY.B0MsLe7wIPYLdxjIRA9EevFgi',1),(12,'1345465651','Flavia Agustina','Contreras','S3cUrity_Eye','$2b$12$AOPC6mzfnQJgPKzY7OoHJek1rRXqdzGnkGYp85ecpksbaGHj87nQK',2),(15,'1345464323','Diana Maria','Gutierrez Miranda','FDm_2023','$2b$12$vu8fl5AvxmJV0NhL5lFuWuuVHoa4B960g5/LqRlacLTmPa8Jr2q12',2);
 
 UNLOCK TABLES;
 
@@ -174,17 +197,17 @@ CREATE TABLE `user_rol` (
   `fk_user_id` int(11) NOT NULL,
   `editor` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`user_rol_id`),
-  KEY `fk_rol_id` (`fk_rol_id`),
-  KEY `fk_user_id` (`fk_user_id`),
-  CONSTRAINT `user_rol_ibfk_1` FOREIGN KEY (`fk_rol_id`) REFERENCES `rol` (`rol_id`) ON UPDATE CASCADE,
-  CONSTRAINT `user_rol_ibfk_2` FOREIGN KEY (`fk_user_id`) REFERENCES `user` (`id`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4;
+  KEY `user_rol_ibfk_1` (`fk_rol_id`),
+  KEY `user_rol_ibfk_2` (`fk_user_id`),
+  CONSTRAINT `user_rol_ibfk_1` FOREIGN KEY (`fk_rol_id`) REFERENCES `rol` (`rol_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_rol_ibfk_2` FOREIGN KEY (`fk_user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4;
 
 /*Data for the table `user_rol` */
 
 LOCK TABLES `user_rol` WRITE;
 
-insert  into `user_rol`(`user_rol_id`,`fk_rol_id`,`fk_user_id`,`editor`) values (1,1,1,1),(2,2,2,1),(3,3,3,0);
+insert  into `user_rol`(`user_rol_id`,`fk_rol_id`,`fk_user_id`,`editor`) values (9,1,10,0),(11,1,12,0),(14,2,15,0);
 
 UNLOCK TABLES;
 
@@ -202,7 +225,7 @@ CREATE TABLE `user_status` (
 
 LOCK TABLES `user_status` WRITE;
 
-insert  into `user_status`(`user_status_id`,`status_name`) values (1,'habilitado'),(2,'deshabilitado'),(3,'permanente');
+insert  into `user_status`(`user_status_id`,`status_name`) values (1,'Habilitado'),(2,'Deshabilitado');
 
 UNLOCK TABLES;
 
@@ -223,11 +246,13 @@ CREATE TABLE `vehicles` (
   CONSTRAINT `vehicles_ibfk_1` FOREIGN KEY (`access_type_id`) REFERENCES `access_type` (`id`) ON UPDATE CASCADE,
   CONSTRAINT `vehicles_ibfk_2` FOREIGN KEY (`status_type_id`) REFERENCES `status_type` (`id`) ON UPDATE CASCADE,
   CONSTRAINT `vehicles_ibfk_3` FOREIGN KEY (`vehicle_type_id`) REFERENCES `vehicles_type` (`id`) ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4;
 
 /*Data for the table `vehicles` */
 
 LOCK TABLES `vehicles` WRITE;
+
+insert  into `vehicles`(`id`,`plate_number`,`access_type_id`,`status_type_id`,`vehicle_type_id`) values (1,'RAA-101',1,1,1),(2,'DDE-234',1,1,2),(3,'GHT-2354',1,1,1),(4,'RAA-104',1,1,1);
 
 UNLOCK TABLES;
 
@@ -245,7 +270,7 @@ CREATE TABLE `vehicles_type` (
 
 LOCK TABLES `vehicles_type` WRITE;
 
-insert  into `vehicles_type`(`id`,`name`) values (1,'militar'),(2,'particular'),(3,'administrativo'),(4,'estudiante');
+insert  into `vehicles_type`(`id`,`name`) values (1,'Militar'),(2,'Particular'),(3,'Administrativo'),(4,'Estudiante');
 
 UNLOCK TABLES;
 

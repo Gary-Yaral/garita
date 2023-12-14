@@ -31,12 +31,12 @@ def add_register(data):
 
 @register_bp.route('/update', methods=['POST'])
 @jwt_required
-def update_drive():
+def update_register():
   return register_controller.update()
 
 @register_bp.route('/delete', methods=['POST'])
 @jwt_required
-def delete_drive():
+def delete_register():
   return register_controller.delete()
 
 @register_bp.route('/home-arrival-data', methods=['GET'])

@@ -69,6 +69,7 @@ def add(data):
 def delete():
     data = request.json
     _id = data.get('id')
+    print(_id)
     if _id == None:
         return jsonify({'error': True, 'message': 'Datos no recibidos'})
     result = registers.delete(_id)

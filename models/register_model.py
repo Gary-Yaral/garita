@@ -17,24 +17,66 @@ class Register():
     try:
       # Seleccionamos usando el filtro
       query = """
-          SELECT 
-            driver.id AS id, dni, 
-            driver.drive_type_id AS type_id, 
-            driver.name AS name, 
-            driver_type.name AS type,
-            surname
-          FROM driver
-          INNER JOIN driver_type
-          ON driver_type.id = driver.drive_type_id
-          WHERE
-              driver.name LIKE CONCAT('%', %s , '%')
-              OR driver.surname LIKE CONCAT('%', %s, '%')
-              OR driver.dni LIKE CONCAT('%', %s, '%')
-              OR driver_type.name LIKE CONCAT('%', %s, '%')
+      SELECT 
+            ar.id AS id,
+            driver.dni,
+            CONCAT(driver.name, ' ', driver.surname) AS driver_name,
+            CONCAT(us.name, ' ', us.surname) AS username,
+            vehicles.plate_number AS plate_number,
+            atype.name AS access_type,
+            rt.name AS register_type,
+            vt.name AS vehicle_type,
+            ar.kms,
+            ar.observation,
+            ar.destiny,
+            DATE_FORMAT(ar.current_time, '%Y-%m-%d %H:%i') AS registered_date
+          FROM access_register AS ar
+          INNER JOIN driver
+          ON driver.id = ar.driver_id
+          INNER JOIN vehicles
+          ON vehicles.id = ar.vehicle_id
+          INNER JOIN access_type AS atype
+          ON atype.id = vehicles.access_type_id
+          INNER JOIN `user` AS us
+          ON us.id = ar.user_id
+          INNER JOIN register_type AS rt
+          ON rt.id = ar.register_type_id
+          INNER JOIN vehicles_type AS vt
+          ON vt.id = vehicles.vehicle_type_id
+           WHERE
+              driver.dni LIKE CONCAT('%', %s , '%')
+              OR driver.name LIKE CONCAT('%', %s , '%')
+              OR driver.surname LIKE CONCAT('%', %s , '%')
+              OR us.name LIKE CONCAT('%', %s , '%')
+              OR us.surname LIKE CONCAT('%', %s , '%')
+              OR vehicles.plate_number LIKE CONCAT('%', %s, '%')
+              OR atype.name LIKE CONCAT('%', %s , '%')
+              Or rt.name LIKE CONCAT('%', %s , '%')
+              OR vt.name LIKE CONCAT('%', %s , '%')
+              OR ar.kms LIKE CONCAT('%', %s , '%')
+              OR ar.observation LIKE CONCAT('%', %s , '%')
+              OR ar.destiny LIKE CONCAT('%', %s , '%')
+              OR ar.current_time LIKE CONCAT('%', %s , '%')
           LIMIT %s OFFSET %s;
           """
       offset = (current_page - 1) * per_page
-      params = (filter, filter, filter, filter, per_page, offset)
+      params = (
+        filter, 
+        filter, 
+        filter, 
+        filter, 
+        filter, 
+        filter, 
+        filter, 
+        filter, 
+        filter, 
+        filter, 
+        filter, 
+        filter, 
+        filter,
+        per_page, 
+        offset
+      )
       cursor.execute(query, params)
       result = cursor.fetchall()
       if not result:
@@ -54,16 +96,49 @@ class Register():
       # Seleccionamos usando el filtro
       query = """
           SELECT COUNT(*) AS total
-          FROM driver
-          INNER JOIN driver_type
-          ON driver_type.id = driver.drive_type_id
-          WHERE
-              driver.name LIKE CONCAT('%', %s , '%')
-              OR driver.surname LIKE CONCAT('%', %s, '%')
-              OR driver.dni LIKE CONCAT('%', %s, '%')
-              OR driver_type.name LIKE CONCAT('%', %s, '%');
+          FROM access_register AS ar
+          INNER JOIN driver
+          ON driver.id = ar.driver_id
+          INNER JOIN vehicles
+          ON vehicles.id = ar.vehicle_id
+          INNER JOIN access_type AS atype
+          ON atype.id = vehicles.access_type_id
+          INNER JOIN `user` AS us
+          ON us.id = ar.user_id
+          INNER JOIN register_type AS rt
+          ON rt.id = ar.register_type_id
+          INNER JOIN vehicles_type AS vt
+          ON vt.id = vehicles.vehicle_type_id
+           WHERE
+              driver.dni LIKE CONCAT('%', %s , '%')
+              OR driver.name LIKE CONCAT('%', %s , '%')
+              OR driver.surname LIKE CONCAT('%', %s , '%')
+              OR us.name LIKE CONCAT('%', %s , '%')
+              OR us.surname LIKE CONCAT('%', %s , '%')
+              OR vehicles.plate_number LIKE CONCAT('%', %s, '%')
+              OR atype.name LIKE CONCAT('%', %s , '%')
+              Or rt.name LIKE CONCAT('%', %s , '%')
+              OR vt.name LIKE CONCAT('%', %s , '%')
+              OR ar.kms LIKE CONCAT('%', %s , '%')
+              OR ar.observation LIKE CONCAT('%', %s , '%')
+              OR ar.destiny LIKE CONCAT('%', %s , '%')
+              OR ar.current_time LIKE CONCAT('%', %s , '%')
           """
-      params = (filter, filter, filter, filter)
+      params = (
+        filter, 
+        filter, 
+        filter, 
+        filter, 
+        filter, 
+        filter, 
+        filter, 
+        filter, 
+        filter, 
+        filter, 
+        filter, 
+        filter, 
+        filter
+      )
       cursor.execute(query, params)
       result = cursor.fetchall()
       if not result:
@@ -79,6 +154,7 @@ class Register():
     try:
       query = """
           SELECT 
+            ar.id AS id,
             driver.dni,
             CONCAT(driver.name, ' ', driver.surname) AS driver_name,
             CONCAT(us.name, ' ', us.surname) AS username,
@@ -89,7 +165,7 @@ class Register():
             ar.kms,
             ar.observation,
             ar.destiny,
-            ar.current_time AS registered_date
+            DATE_FORMAT(ar.current_time, '%Y-%m-%d %H:%i') AS registered_date
           FROM access_register AS ar
           INNER JOIN driver
           ON driver.id = ar.driver_id
@@ -121,7 +197,7 @@ class Register():
     cursor = self.new_cursor()
     try:
       query = """
-          SELECT COUNT(*) AS total FROM driver;
+          SELECT COUNT(*) AS total FROM access_register;
           """
       params = ()
       cursor.execute(query, params)
@@ -208,7 +284,6 @@ class Register():
 
   def addNew(self, driver_id, vehicle_id, user_id, kms, destiny, observation, status_type_id):
     cursor = self.new_cursor()
-    print(VehicleStatus.DENTRO)
     try:
       query = """
         INSERT INTO access_register(
@@ -223,19 +298,43 @@ class Register():
         """
       params = ()
       register_type_id = 0
+      new_status_id = 0
       if status_type_id == VehicleStatus.DENTRO:
         register_type_id = RegisterType.SALIDA
+        new_status_id = VehicleStatus.FUERA
       
       if status_type_id == VehicleStatus.FUERA:
-        register_type_id = RegisterType.SALIDA
-        return (True, "va a ingresar")
-      
+        register_type_id = RegisterType.ENTRADA     
+        new_status_id = VehicleStatus.DENTRO
       params = (driver_id, vehicle_id, user_id, kms, destiny, observation, register_type_id)
       cursor.execute(query, params)
       if cursor.rowcount > 0:
         self.conn.commit()
-        return (True, {'message':'Registro agregado correctamente'})
+        if self.update_status(new_status_id, vehicle_id):
+          return (True, {'message':'Registro agregado correctamente'})
+        else:
+          return (False, {'message':'Ha ocurrido un error al editar el estado del vehículo'})
       return (False, {'message':'Ha ocurrido un error al agregar el registro'})
+    except Exception as e:
+      print("Error: {}".format(e))
+      return (False, {'error':'Ha ocurrido un error al agregar el registro'})
+    finally:
+      cursor.close()
+
+  def update_status(self, new_status_id, _id):
+    cursor = self.new_cursor()
+    try:
+      query = """
+        UPDATE vehicles
+        SET status_type_id=%s
+        WHERE id = %s;
+        """
+      params = (new_status_id, _id)
+      cursor.execute(query, params)
+      if cursor.rowcount > 0:
+        self.conn.commit()
+        return (True, {'message':'Estado actualizado correctamente'})
+      return (False, {'message':'Ha ocurrido un error al actualizar el estado del vehículo'})
     except Exception as e:
       print("Error: {}".format(e))
       return (False, {'error':'Ha ocurrido un error al agregar el registro'})
@@ -244,18 +343,20 @@ class Register():
 
   def delete(self, _id):
     cursor = self.new_cursor()
+    print('id:', _id)
     try:
       # Si ya existe la cedula y no pertenece al mismo chofer entonces retornamos error
-      query = """DELETE FROM driver WHERE id = %s"""
+      query = """DELETE FROM access_register WHERE id = %s"""
       params = (_id,)
       cursor.execute(query, params)
       if cursor.rowcount > 0:
         self.conn.commit()
-        return (True, {'message':'Chofer eliminado correctamente'})
+        return (True, {'message':'Registro eliminado correctamente'})
       return (False, {'message':'Ha ocurrido un error al eliminar el registro'})
         
     except Exception as e:
       print("Error: {}".format(e)) 
+      return (False, {'error':'Ha ocurrido un error al eliminar el registro'})
     finally:
       cursor.close()
 
@@ -270,7 +371,7 @@ class Register():
             SELECT v.vehicle_type_id, acr.vehicle_id
             FROM access_register AS acr
             INNER JOIN vehicles AS v ON v.id = acr.vehicle_id
-            WHERE DATE(acr.arrival_time) = DATE(CURRENT_TIMESTAMP())
+            WHERE DATE(acr.current_time) = DATE(CURRENT_TIMESTAMP())
         ) AS acr ON vt.id = acr.vehicle_type_id
         GROUP BY vt.name;"""
       
@@ -298,7 +399,7 @@ class Register():
             SELECT v.vehicle_type_id, acr.vehicle_id
             FROM access_register AS acr
             INNER JOIN vehicles AS v ON v.id = acr.vehicle_id
-            WHERE DATE(acr.exit_time) = DATE(CURRENT_TIMESTAMP())
+            WHERE DATE(acr.current_time) = DATE(CURRENT_TIMESTAMP())
         ) AS acr ON vt.id = acr.vehicle_type_id
         GROUP BY vt.name;"""
       
