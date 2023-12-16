@@ -347,12 +347,12 @@ class Register():
             SELECT v.vehicle_type_id, acr.vehicle_id
             FROM access_register AS acr
             INNER JOIN vehicles AS v ON v.id = acr.vehicle_id
-            WHERE DATE(acr.current_time) = DATE(CURRENT_TIMESTAMP())
+            WHERE DATE(acr.current_time) = DATE(CURRENT_TIMESTAMP()) AND register_type_id = %s
         ) AS acr ON vt.id = acr.vehicle_type_id
         GROUP BY vt.name;"""
       
       
-      params = ()
+      params = (RegisterType.ENTRADA,)
       cursor.execute(query, params)
       result = cursor.fetchall()
       if result: 
@@ -375,12 +375,12 @@ class Register():
             SELECT v.vehicle_type_id, acr.vehicle_id
             FROM access_register AS acr
             INNER JOIN vehicles AS v ON v.id = acr.vehicle_id
-            WHERE DATE(acr.current_time) = DATE(CURRENT_TIMESTAMP())
+            WHERE DATE(acr.current_time) = DATE(CURRENT_TIMESTAMP()) AND register_type_id = %s
         ) AS acr ON vt.id = acr.vehicle_type_id
         GROUP BY vt.name;"""
       
       
-      params = ()
+      params = (RegisterType.SALIDA,)
       cursor.execute(query, params)
       result = cursor.fetchall()
       if result: 
