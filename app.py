@@ -1,6 +1,6 @@
 from flask import Flask, jsonify
 import pytesseract
-from config.env import secret_key
+from config.env import secret_key,url_frontend
 from flask_cors import CORS
 from routes import user, driver, vehicle, excel, register
 from db_config.mysql import MysqlDB
@@ -8,7 +8,7 @@ from db_config.mysql import MysqlDB
 app = Flask(__name__)
 
 app.secret_key = secret_key
-CORS(app, resources={r"/*": {"origins": "*"}}, expose_headers=["Content-Disposition"])
+CORS(app, resources={r"/*": {"origins": url_frontend}}, expose_headers=["Content-Disposition"])
 
 # Configuración de la ubicación de Tesseract OCR
 pytesseract.pytesseract.tesseract_cmd = r'C:\Users\Hp\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'

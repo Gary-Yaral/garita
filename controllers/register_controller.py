@@ -41,13 +41,14 @@ def get_types():
 def update():
     data = request.json
     _id = data.get('id')
-    dni = data.get('dni')
-    name = data.get('name')
-    surname = data.get('surname')
-    type_id = data.get('type_id')
-    if _id == None or dni == None or name == None or surname == None or type_id == None:
+    driver_id = data.get('driver_id')
+    kms = data.get('kms')
+    destiny = data.get('destiny')
+    observation = data.get('observation')
+    print(data)
+    if _id == None or driver_id == None or kms == None or destiny == None or observation == None:
         return jsonify({'error': True, 'message': 'Datos no recibidos'})
-    result = registers.update(_id, dni, name, surname, type_id)
+    result = registers.update(driver_id, kms, destiny, observation, _id)
     return jsonify({'result':result})
 
 def add(data):
@@ -69,7 +70,6 @@ def add(data):
 def delete():
     data = request.json
     _id = data.get('id')
-    print(_id)
     if _id == None:
         return jsonify({'error': True, 'message': 'Datos no recibidos'})
     result = registers.delete(_id)
@@ -81,4 +81,10 @@ def get_home_arrival_data():
 
 def get_home_exit_data():
     result = registers.get_home_exit_data()
+    return jsonify({'result':result})
+
+def get_register_by_id():
+    data = request.json
+    _id = data.get('id')
+    result = registers.get_register(_id)
     return jsonify({'result':result})

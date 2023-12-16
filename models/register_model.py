@@ -210,71 +210,47 @@ class Register():
     finally:
       cursor.close()
 
-  def get_types(self):
-    cursor = self.new_cursor()
-    try:
-      query = """
-          SELECT * FROM driver_type;
-          """
-      params = ()
-      cursor.execute(query, params)
-      result = cursor.fetchall()
-      if not result:
-        return (False, None)
-      return (True, result)
-    except mysql.connector.Error as e:
-      print("Error: {}".format(e))
-    finally:
-      cursor.close()
-
-  def update(self, _id, dni, name, surname, type_id):
+  def update(self, driver_id, kms, destiny, observation, _id):
     cursor = self.new_cursor()
     try:
       # Rescatamos la data para luego compararla
       data = {
-        'dni':dni, 
-        'name':name, 
-        'surname': surname, 
-        'drive_type_id': type_id
+        'driver_id':driver_id, 
+        'kms':kms, 
+        'destiny': destiny, 
+        'observation':observation 
       }
       # Si ya existe la cedula y no pertenece al mismo chofer entonces retornamos error
-      query = """SELECT * FROM driver WHERE dni = %s"""
-      params = (dni,)
+      query = """SELECT * FROM access_register WHERE id = %s"""
+      params = (_id,)
       cursor.execute(query, params)
-      result = cursor.fetchall()
-      isSameDriver = True
-      if len(result) > 0:
-        for drive in result:
-          if drive['id'] != _id:
-            isSameDriver = False
-      
-      if isSameDriver == False:
-        return (False, {'error': 'Ya existe un usuario con ese número de cedula'})
-      # Si la cedula pertenece al mismo chofer
+      found_register = cursor.fetchall()
+
+      # Actualizamos los datos
       query = """
-            UPDATE driver
-            SET 
-              dni = %s, 
-              name = %s, 
-              surname = %s, 
-              drive_type_id = %s
-            WHERE id = %s
-          """
-      params = (dni, name, surname, type_id, _id)
+        UPDATE access_register SET
+          driver_id = %s,  
+          kms = %s,
+          destiny = %s,
+          observation = %s
+        WHERE id = %s
+        """
+      params = (driver_id, kms, destiny, observation, _id)
       cursor.execute(query, params)
       # Si los datos enviados on diferentes se actualizará
       if cursor.rowcount > 0:
         self.conn.commit()
-        return (True, {'message':'Chofer actualizado correctamente'})  
+        return (True, {'message':'Registro actualizado correctamente'})  
       # Si no se actualiza verificamos que datos enviados sean iguales a los existentes
+      print(found_register)
       keys = list(data.keys())
       totalKeys = len(keys)
       counter = 0
       for key in keys:
-        if str(data[key]) == str(result[0][key]):
+        if str(data[key]) == str(found_register[0][key]):
           counter = counter + 1
       if totalKeys == counter:
-        return (True, {'message':'Chofer actualizado correctamente'})
+        return (True, {'message':'Registro actualizado correctamente'})
       # si se da un error al actualizar
       return (False, {'message':'Ha ocurrido un error al actualizar el registro'})
     except Exception as e:
@@ -321,6 +297,7 @@ class Register():
     finally:
       cursor.close()
 
+  # Actualiza el estado del vehiculo en cada registro 
   def update_status(self, new_status_id, _id):
     cursor = self.new_cursor()
     try:
@@ -343,7 +320,6 @@ class Register():
 
   def delete(self, _id):
     cursor = self.new_cursor()
-    print('id:', _id)
     try:
       # Si ya existe la cedula y no pertenece al mismo chofer entonces retornamos error
       query = """DELETE FROM access_register WHERE id = %s"""
@@ -416,5 +392,27 @@ class Register():
     finally:
       cursor.close()
 
+  def get_register(self, _id):
+    cursor = self.new_cursor()
+    try:
+      # Si ya existe la cedula y no pertenece al mismo chofer entonces retornamos error
+      query = """
+        SELECT ar.id, ar.destiny, ar.kms, ar.observation, driver.dni, vehicles.plate_number FROM access_register as ar
+        INNER JOIN vehicles
+        ON vehicles.id = ar.vehicle_id 
+        INNER JOIN driver
+        ON driver.id = ar.driver_id
+        WHERE ar.id = %s"""
+      params = (_id,)
+      cursor.execute(query, params)
+      result = cursor.fetchone()
+      if result: 
+        return (True, result)
+      return (False, None)
+    except Exception as e:
+      print("Error: {}".format(e)) 
+      return (False, None)
+    finally:
+      cursor.close()
   
 RegisterModel = Register()

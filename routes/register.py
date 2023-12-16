@@ -49,6 +49,10 @@ def get_home_arrival_data():
 def get_home_exit_data():
   return register_controller.get_home_exit_data()
 
+@register_bp.route('/find-one', methods=['POST'])
+@jwt_required
+def get_one_by_id():
+  return register_controller.get_register_by_id()
     
         
 
