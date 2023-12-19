@@ -45,7 +45,6 @@ def update():
     kms = data.get('kms')
     destiny = data.get('destiny')
     observation = data.get('observation')
-    print(data)
     if _id == None or driver_id == None or kms == None or destiny == None or observation == None:
         return jsonify({'error': True, 'message': 'Datos no recibidos'})
     result = registers.update(driver_id, kms, destiny, observation, _id)
@@ -56,13 +55,11 @@ def add(data):
     vehicle_id = form.get('vehicle_id')
     driver_id = form.get('driver_id')
     user_id = data['data']['user']['id']
-    print('id: ', user_id)
     status_type_id = form.get('status_type_id')
     kms = form.get('kms')
     destiny = form.get('destiny')
     observation = form.get('observation')
-    print(driver_id, vehicle_id, user_id, kms, destiny, observation, status_type_id)
-    if not vehicle_id :
+    if vehicle_id == None or driver_id == None or user_id == None or status_type_id == None or kms == None or destiny == None or observation == None:
         return jsonify({'error': True, 'message': 'Datos no recibidos'})
     result = registers.addNew(driver_id, vehicle_id, user_id, kms, destiny, observation, status_type_id)
     return jsonify({'result':result})

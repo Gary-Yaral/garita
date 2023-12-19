@@ -242,7 +242,6 @@ class Register():
         self.conn.commit()
         return (True, {'message':'Registro actualizado correctamente'})  
       # Si no se actualiza verificamos que datos enviados sean iguales a los existentes
-      print(found_register)
       keys = list(data.keys())
       totalKeys = len(keys)
       counter = 0

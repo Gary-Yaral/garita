@@ -543,8 +543,6 @@ class User():
             fk_user_status_id = %s
           WHERE id = %s
         """
-      print(query)
-      print(params)
       cursor.execute(query, params)
       self.conn.commit()
       return True

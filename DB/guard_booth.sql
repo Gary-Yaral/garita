@@ -39,13 +39,13 @@ CREATE TABLE `access_register` (
   CONSTRAINT `access_register_ibfk_2` FOREIGN KEY (`vehicle_id`) REFERENCES `vehicles` (`id`) ON UPDATE CASCADE,
   CONSTRAINT `access_register_ibfk_3` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON UPDATE CASCADE,
   CONSTRAINT `access_register_ibfk_4` FOREIGN KEY (`register_type_id`) REFERENCES `register_type` (`id`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=44 DEFAULT CHARSET=utf8mb4;
 
 /*Data for the table `access_register` */
 
 LOCK TABLES `access_register` WRITE;
 
-insert  into `access_register`(`id`,`driver_id`,`vehicle_id`,`user_id`,`kms`,`destiny`,`observation`,`register_type_id`,`current_time`) values (6,13,2,10,'','','',2,'2023-12-13 18:55:47'),(7,13,1,10,'34','Mi casa','Ninguna',2,'2023-12-13 18:58:23');
+insert  into `access_register`(`id`,`driver_id`,`vehicle_id`,`user_id`,`kms`,`destiny`,`observation`,`register_type_id`,`current_time`) values (9,14,1,10,'3466','Francia','Ninguna',1,'2023-12-14 15:47:30'),(20,13,1,10,'436','vbcbc','fgjgj',2,'2023-12-14 17:14:17'),(21,13,1,10,'436','vbcbc','ghgg',1,'2023-12-14 17:18:57'),(22,14,1,10,'36','fhfh','hfhhf',2,'2023-12-14 17:45:58'),(23,14,1,10,'636','gf','fgfdgf',1,'2023-12-14 17:46:22'),(25,14,1,10,'566','dsgsd','dsgg',1,'2023-12-14 17:50:51'),(27,14,1,10,'54645','Galapagos','mundo',1,'2023-12-14 18:07:04'),(28,14,1,10,'546','56','gsssdg',2,'2023-12-14 18:17:17'),(29,14,1,10,'45','cxcc','xzxv',1,'2023-12-14 18:18:15'),(30,14,1,10,'4','ddg','dgsdgs',2,'2023-12-14 18:19:19'),(31,14,1,10,'4545','edgdsg','dgsg',1,'2023-12-14 18:19:36'),(32,14,1,10,'656','ssaf','safsf',2,'2023-12-14 18:20:45'),(33,14,1,10,'56546','ff','fdhh',1,'2023-12-14 18:21:54'),(34,14,1,10,'52','ffdsfd','fdsfs',2,'2023-12-14 18:22:42'),(35,14,1,10,'234','vds','dsvsdv',1,'2023-12-14 18:23:59'),(36,14,1,10,'6346','gsg','dsgdsg',2,'2023-12-14 18:28:24'),(37,14,1,10,'345','xvzz','zxvzvz',1,'2023-12-14 18:31:56'),(38,14,1,10,'435','dfdf','sdfsdf',2,'2023-12-14 18:32:35'),(39,14,1,10,'454','fdsf','dsfsdf',1,'2023-12-14 18:32:49'),(40,13,1,10,'333','Mexico','Hello',2,'2023-12-16 11:33:31'),(41,14,1,10,'54645','fhdf','Mi destino',1,'2023-12-16 12:31:48'),(42,4,1,10,'1244','Florida','Ninguna',2,'2023-12-16 16:36:51'),(43,2,2,10,'','','',2,'2023-12-16 16:40:05');
 
 UNLOCK TABLES;
 
@@ -86,7 +86,7 @@ CREATE TABLE `driver` (
 
 LOCK TABLES `driver` WRITE;
 
-insert  into `driver`(`id`,`dni`,`name`,`surname`,`drive_type_id`) values (2,'1243545462','Adrian Flores','Barba',2),(4,'1335454664','Flavia Maria','Contreras',3),(5,'1457686861','Marcos','Andrade',4),(6,'1465757753','Diana','Arboleda',5),(7,'1233578754','Gustavo Mario','Mora Litardo',3),(8,'1247658659','Hugo','Torres',4),(10,'1567645443','Julio','Nagua',4),(13,'1345464653','Oliver Andrés','Atom Mirana',1),(14,'1358684742','Amalia Mirai','Gonzales Plata',1),(17,'1555254596','Olivia Maria','Gonzales',4);
+insert  into `driver`(`id`,`dni`,`name`,`surname`,`drive_type_id`) values (2,'1243545462','Adrian Flores','Barba',2),(4,'1335454664','Flavia Maria','Contreras',1),(5,'1457686861','Marcos','Andrade',4),(6,'1465757753','Diana','Arboleda',5),(7,'1233578754','Gustavo Mario','Mora Litardo',4),(8,'1247658659','Hugo','Torres',4),(10,'1567645443','Julio','Nagua',4),(13,'1345464653','Oliver Andrés','Atom Mirana',2),(14,'1358684742','Amalia Mirai','Gonzales Plata',1),(17,'1555254596','Olivia Maria','Gonzales',4);
 
 UNLOCK TABLES;
 
@@ -246,13 +246,13 @@ CREATE TABLE `vehicles` (
   CONSTRAINT `vehicles_ibfk_1` FOREIGN KEY (`access_type_id`) REFERENCES `access_type` (`id`) ON UPDATE CASCADE,
   CONSTRAINT `vehicles_ibfk_2` FOREIGN KEY (`status_type_id`) REFERENCES `status_type` (`id`) ON UPDATE CASCADE,
   CONSTRAINT `vehicles_ibfk_3` FOREIGN KEY (`vehicle_type_id`) REFERENCES `vehicles_type` (`id`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4;
 
 /*Data for the table `vehicles` */
 
 LOCK TABLES `vehicles` WRITE;
 
-insert  into `vehicles`(`id`,`plate_number`,`access_type_id`,`status_type_id`,`vehicle_type_id`) values (1,'RAA-101',1,1,1),(2,'DDE-234',1,1,2),(3,'GHT-2354',1,1,1),(4,'RAA-104',1,1,1);
+insert  into `vehicles`(`id`,`plate_number`,`access_type_id`,`status_type_id`,`vehicle_type_id`) values (1,'RAA-101',1,2,1),(2,'DDE-234',1,2,2),(3,'GHT-2354',1,1,1),(8,'GHT-2353',1,1,2),(9,'TGG-4663',1,1,2);
 
 UNLOCK TABLES;
 
