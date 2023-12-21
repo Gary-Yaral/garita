@@ -1,5 +1,5 @@
 import mysql.connector
-from db_config.mysql import conn
+from db_config.mysql import MysqlDB
 from pwd_md.pass_config import hash_password
 
 # Importante - Deben ser similar a los valores de la BD
@@ -11,13 +11,11 @@ class User():
   cursor = None
 
   def __init__(self,):
-    self.conn = conn
+    self.conn = MysqlDB()
   
-  def new_cursor(self):
-    return self.conn.cursor(dictionary=True)
-
   def find_user(self, user):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       query = """
           SELECT *
@@ -31,9 +29,11 @@ class User():
       print("Error: {}".format(e))
     finally:
       cursor.close()
+      conn.close()
 
   def load(self, per_page, current_page):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       query = """
           SELECT 
@@ -66,9 +66,11 @@ class User():
       print("Error: {}".format(e))
     finally:
       cursor.close()
+      conn.close()
 
   def get_status_types(self):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       query = """
           SELECT 
@@ -86,9 +88,11 @@ class User():
       print("Error: {}".format(e))
     finally:
       cursor.close()
+      conn.close()
 
   def get_total(self):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       query = """
           SELECT COUNT(*) AS total FROM user;
@@ -103,9 +107,11 @@ class User():
       print("Error: {}".format(e))
     finally:
       cursor.close()
+      conn.close()
 
   def find_user_status(self, status_id):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       query = """
           SELECT *
@@ -118,9 +124,11 @@ class User():
       print("Error: {}".format(e))
     finally:
       cursor.close()
+      conn.close()
 
   def get_user_roles(self, user_id):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       query = """
           SELECT *
@@ -135,11 +143,13 @@ class User():
       print("Error: {}".format(e))
     finally:
       cursor.close()
+      conn.close()
   
     # Métodos CRUD
   
   def update(self, _id, dni, name, surname, username, password, status, rol):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       # Si intenta cambiar la cedula por una ya existente
       can_use_dni = self.can_use_DNI(dni, _id)
@@ -172,9 +182,11 @@ class User():
       return (False, {'error':'Ha ocurrido un error al actualizar el registro'})
     finally:
       cursor.close()
+      conn.close()
 
   def delete(self, _id):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       canDelete = self.is_last_admin_enable(_id)
       if canDelete:
@@ -195,7 +207,7 @@ class User():
           params = (_id,)
           cursor.execute(query, params)
           if cursor.rowcount > 0:
-            self.conn.commit()
+            conn.commit()
             return result_ok
           return result_err
         
@@ -209,7 +221,7 @@ class User():
         params = (_id,)
         cursor.execute(query, params)
         if cursor.rowcount > 0:
-          self.conn.commit()
+          conn.commit()
           return result_ok
         return result_err
       
@@ -222,10 +234,12 @@ class User():
       return (False, {'error':'Ha ocurrido un error al eliminar el registro'})
     finally:
       cursor.close()
+      conn.close()
   
   # Métodos para filtrar en el datatables
   def filter(self, per_page, current_page, filter):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       # Seleccionamos usando el filtro
       query = """
@@ -270,10 +284,12 @@ class User():
       print("Error: {}".format(e))
     finally:
       cursor.close()
+      conn.close()
 
   # Obtiene el total de registro que trae el filtro
   def get_total_filtered(self, filter):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       # Seleccionamos usando el filtro
       query = """
@@ -298,9 +314,11 @@ class User():
       print("Error: {}".format(e))
     finally:
       cursor.close()
+      conn.close()
 
   def add_new(self, dni, name, surname, username, password, status, rol_id):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       # Si ya existe la cedula en la bse datos entonces retornamos error
       query = """SELECT * FROM user WHERE dni = %s"""
@@ -327,7 +345,7 @@ class User():
       params = (dni, name, surname, username, encryptedPass, status)
       cursor.execute(query, params)
       if cursor.rowcount > 0:
-        self.conn.commit()
+        conn.commit()
         result = self.add_role(dni, rol_id)
         if result[0] == True:
           return (True, {'message':'Usuario agregado correctamente'})
@@ -337,10 +355,12 @@ class User():
       print("Error: {}".format(e))
       return (False, {'message':'Ha ocurrido un error al agregar el registro'})
     finally:
-      cursor.close()  
+      cursor.close()
+      conn.close()  
 
   def add_role(self, dni, rol_id):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       # Buscamos el usuario que se acaba de registrar con su dni
       query = """SELECT * FROM user WHERE dni = %s"""
@@ -355,7 +375,7 @@ class User():
         cursor.execute(query, params)
         result = cursor.fetchall()      
       if cursor.rowcount > 0:
-        self.conn.commit()
+        conn.commit()
         return (True, {'message':'Rol agregado correctamente al usuario'})
       return (False, {'message':'Ha ocurrido un error al agregar el registro'})
     except Exception as e:
@@ -363,9 +383,11 @@ class User():
       return (False, {'message':'Ha ocurrido un error al agregar el registro'})
     finally:
       cursor.close()
+      conn.close()
 
   def get_roles(self):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       # Buscamos el usuario que se acaba de registrar con su dni
       query = """SELECT rol_id AS id, rol_name AS name FROM rol"""
@@ -379,9 +401,11 @@ class User():
       print("Error: {}".format(e))
     finally:
       cursor.close()
+      conn.close()
 
   def can_use_DNI(self, _dni, _id):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       # Si ya existe la cedula en la base datos entonces retornamos error
       query = """SELECT * FROM user WHERE dni = %s"""
@@ -398,9 +422,11 @@ class User():
       print("Error: {}".format(e))
     finally:
       cursor.close()
+      conn.close()
 
   def can_use_username(self, username, _id):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       query = """SELECT * FROM user WHERE username = %s"""
       params = (username,)
@@ -416,9 +442,11 @@ class User():
       print("Error: {}".format(e))
     finally:
       cursor.close()
+      conn.close()
 
   def is_last_admin_enable(self, _id):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       # Verificamos que no sea el ultimo administrador habilitado
       query = """
@@ -447,9 +475,11 @@ class User():
       print("Error: {}".format(e))
     finally:
       cursor.close()
+      conn.close()
   
   def is_admin(self, _id):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       # Verificamos que no sea el ultimo administrador habilitado
       query = """
@@ -471,9 +501,11 @@ class User():
       print("Error: {}".format(e))
     finally:
       cursor.close()
+      conn.close()
 
   def update_last_admin(self, dni, name, surname, username, password, _id):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:   
       # Si no envian la nueva password
       params = ()
@@ -503,16 +535,18 @@ class User():
           WHERE id = %s
           """
       cursor.execute(query, params)
-      self.conn.commit()
+      conn.commit()
       return True
     except Exception as e:
       print("Error: {}".format(e))
       return False
     finally:
       cursor.close()
+      conn.close()
 
   def update_any_user(self, dni, name, surname, username, password, status, _id):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:   
       # Si no envian la nueva password
       params = ()
@@ -544,16 +578,18 @@ class User():
           WHERE id = %s
         """
       cursor.execute(query, params)
-      self.conn.commit()
+      conn.commit()
       return True
     except Exception as e:
       print("Error: {}".format(e))
       return False
     finally:
       cursor.close()
+      conn.close()
 
   def update_rol(self, rol, _id):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:   
       params = (rol, _id)
       query = """
@@ -563,12 +599,13 @@ class User():
         WHERE fk_user_id = %s
       """
       cursor.execute(query, params)
-      self.conn.commit()
+      conn.commit()
       return True
     except Exception as e:
       print("Error: {}".format(e))
       return False
     finally:
       cursor.close()
+      conn.close()
 
 UserSystem = User()

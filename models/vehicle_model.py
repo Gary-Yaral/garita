@@ -1,17 +1,16 @@
-from db_config.mysql import conn
+from db_config.mysql import conn, MysqlDB
+import mysql.connector
 
 class Vehicle():
   conn = None
   cursor = None
 
   def __init__(self,):
-    self.conn = conn
-
-  def new_cursor(self):
-    return self.conn.cursor(dictionary=True)
+    self.conn = MysqlDB()
 
   def load(self, per_page, current_page):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       query = """
           SELECT 
@@ -44,9 +43,11 @@ class Vehicle():
       return (False, None)
     finally:
       cursor.close()
+      conn.close()
 
   def get_total(self):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       query = """
           SELECT COUNT(*) AS total FROM vehicles;
@@ -62,10 +63,12 @@ class Vehicle():
       return (False, None)
     finally:
       cursor.close()
+      conn.close()
   
   # Funcion que hace la busqueda de la placa en la BD
   def find_vehicle(self, plate_number):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       query = """
           SELECT 
@@ -99,7 +102,8 @@ class Vehicle():
       cursor.close()
 
   def load_access_type(self):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       query = """
           SELECT * from access_type
@@ -114,9 +118,11 @@ class Vehicle():
       {"loaded": False }
     finally:
       cursor.close()
+      conn.close()
 
   def load_status_type(self):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       query = """
           SELECT * from status_type
@@ -131,9 +137,11 @@ class Vehicle():
       {"loaded": False }
     finally:
       cursor.close()
+      conn.close()
 
   def load_vehicles_type(self):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       query = """
           SELECT * from vehicles_type
@@ -148,6 +156,7 @@ class Vehicle():
       {"loaded": False }
     finally:
       cursor.close()
+      conn.close()
   
   # Consulta datos para formulario de nuevo registro de accesso o salida
   def load_required_data(self):
@@ -176,7 +185,8 @@ class Vehicle():
 
   # Métodos CRUD
   def update(self, _id, plate_number, access_type_id, vehicle_type_id, status_type_id):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       # Rescatamos la data para luego compararla
       data = {
@@ -213,7 +223,7 @@ class Vehicle():
       cursor.execute(query, params)
       # Si los datos enviados on diferentes se actualizará
       if cursor.rowcount > 0:
-        self.conn.commit()
+        conn.commit()
         return (True, {'message':'Vehículo actualizado correctamente'})  
       # Si no se actualiza verificamos que datos enviados sean iguales a los existentes
       keys = list(data.keys())
@@ -230,9 +240,11 @@ class Vehicle():
       print("Error: {}".format(e))
     finally:
       cursor.close()
+      conn.close()
 
   def addNew(self, plate_number, access_type_id, vehicle_type_id, status_type_id):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       # Si ya existe la cedula en la bse datos entonces retornamos error
       query = """SELECT * FROM vehicles WHERE plate_number = %s"""
@@ -250,34 +262,41 @@ class Vehicle():
       params = (plate_number, access_type_id, vehicle_type_id, status_type_id,)
       cursor.execute(query, params)
       if cursor.rowcount > 0:
-        self.conn.commit()
+        conn.commit()
         return (True, {'message':'Vehículo agregado correctamente'})
       return (False, {'message':'Ha ocurrido un error al agregar el registro'})
     except Exception as e:
       print("Error: {}".format(e))
     finally:
       cursor.close()
+      conn.close()
 
   def delete(self, _id):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       # Si ya existe la cedula y no pertenece al mismo chofer entonces retornamos error
       query = """DELETE FROM vehicles WHERE id = %s"""
       params = (_id,)
       cursor.execute(query, params)
       if cursor.rowcount > 0:
-        self.conn.commit()
+        conn.commit()
         return (True, {'message':'Vehículo eliminado correctamente'})
       return (False, {'message':'Ha ocurrido un error al eliminar el registro'})
         
-    except Exception as e:
+    except mysql.connector.Error as e:
       print("Error: {}".format(e))
+      if e.errno == 1451:
+        return (False, {'error':'No es posible eliminar el registro, tiene registros vinculados'})
+      return (False, {'error':'Ha ocurrido un error al eliminar el registro'})
     finally:
       cursor.close()
+      conn.close()
 
   # Métodos para filtrar en el datatables
   def filter(self, per_page, current_page, filter):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       # Seleccionamos usando el filtro
       query = """
@@ -319,10 +338,12 @@ class Vehicle():
       return (False, None)
     finally:
       cursor.close()
+      conn.close()
       
   # Obtiene el total de registro que trae el filtro
   def get_total_filtered(self, filter):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       # Seleccionamos usando el filtro
       query = """
@@ -351,5 +372,6 @@ class Vehicle():
       return (False, None)
     finally:
       cursor.close()
+      conn.close()
 
 VehicleModel = Vehicle()

@@ -1,4 +1,4 @@
-from db_config.mysql import conn
+from db_config.mysql import conn, MysqlDB
 import mysql.connector
 
 class Driver():
@@ -6,13 +6,11 @@ class Driver():
   cursor = None
 
   def __init__(self,):
-    self.conn = conn
-
-  def new_cursor(self):
-    return self.conn.cursor(dictionary=True)
+    self.conn = MysqlDB()
 
   def filter(self, per_page, current_page, filter):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       # Seleccionamos usando el filtro
       query = """
@@ -46,9 +44,11 @@ class Driver():
       print("Error: {}".format(e))
     finally:
       cursor.close()
+      conn.close()
 
   def get_total_filtered(self, filter):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       # Seleccionamos usando el filtro
       query = """
@@ -72,9 +72,11 @@ class Driver():
       print("Error: {}".format(e))
     finally:
       cursor.close()
+      conn.close()
 
   def load(self, per_page, current_page):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       query = """
           SELECT 
@@ -99,9 +101,11 @@ class Driver():
       print("Error: {}".format(e))
     finally:
       cursor.close()
+      conn.close()
 
   def get_total(self):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       query = """
           SELECT COUNT(*) AS total FROM driver;
@@ -116,9 +120,11 @@ class Driver():
       print("Error: {}".format(e))
     finally:
       cursor.close()
+      conn.close()
 
   def get_types(self):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       query = """
           SELECT * FROM driver_type;
@@ -133,9 +139,11 @@ class Driver():
       print("Error: {}".format(e))
     finally:
       cursor.close()
+      conn.close()
 
   def update(self, _id, dni, name, surname, type_id):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       # Rescatamos la data para luego compararla
       data = {
@@ -171,7 +179,7 @@ class Driver():
       cursor.execute(query, params)
       # Si los datos enviados on diferentes se actualizará
       if cursor.rowcount > 0:
-        self.conn.commit()
+        conn.commit()
         return (True, {'message':'Chofer actualizado correctamente'})  
       # Si no se actualiza verificamos que datos enviados sean iguales a los existentes
       keys = list(data.keys())
@@ -188,9 +196,11 @@ class Driver():
       print("Error: {}".format(e))
     finally:
       cursor.close()
+      conn.close()
 
   def addNew(self, dni, name, surname, type_id):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       # Si ya existe la cedula en la bse datos entonces retornamos error
       query = """SELECT * FROM driver WHERE dni = %s"""
@@ -208,33 +218,40 @@ class Driver():
       params = (dni, name, surname, type_id,)
       cursor.execute(query, params)
       if cursor.rowcount > 0:
-        self.conn.commit()
+        conn.commit()
         return (True, {'message':'Chofer agregado correctamente'})
       return (False, {'message':'Ha ocurrido un error al agregar el registro'})
     except Exception as e:
       print("Error: {}".format(e))
     finally:
       cursor.close()
+      conn.close()
 
   def delete(self, _id):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       # Si ya existe la cedula y no pertenece al mismo chofer entonces retornamos error
       query = """DELETE FROM driver WHERE id = %s"""
       params = (_id,)
       cursor.execute(query, params)
       if cursor.rowcount > 0:
-        self.conn.commit()
+        conn.commit()
         return (True, {'message':'Chofer eliminado correctamente'})
       return (False, {'message':'Ha ocurrido un error al eliminar el registro'})
         
-    except Exception as e:
-      print("Error: {}".format(e)) 
+    except mysql.connector.Error as e:
+      print("Error: {}".format(e))
+      if e.errno == 1451:
+        return (False, {'error':'No es posible eliminar el registro, tiene registros vinculados'})
+      return (False, {'error':'Ha ocurrido un error al eliminar el registro'})
     finally:
       cursor.close()
+      conn.close()
 
   def find_driver(self, dni):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       # Si ya existe la cedula y no pertenece al mismo chofer entonces retornamos error
       query = """
@@ -260,6 +277,7 @@ class Driver():
       return (False, None)
     finally:
       cursor.close()
+      conn.close()
 
   
 DriverModel = Driver()

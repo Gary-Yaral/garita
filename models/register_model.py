@@ -1,19 +1,20 @@
-from db_config.mysql import conn
-import mysql.connector
+from db_config.mysql import MysqlDB
 from db_constants.global_constants import VehicleStatus, RegisterType
+import mysql.connector
 
 class Register():
   conn = None
   cursor = None
 
   def __init__(self,):
-    self.conn = conn
+    self.conn = MysqlDB()
 
   def new_cursor(self):
     return self.conn.cursor(dictionary=True)
 
   def filter(self, per_page, current_page, filter):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       # Seleccionamos usando el filtro
       query = """
@@ -89,9 +90,11 @@ class Register():
       print("Error: {}".format(e))
     finally:
       cursor.close()
+      conn.close()
 
   def get_total_filtered(self, filter):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       # Seleccionamos usando el filtro
       query = """
@@ -148,9 +151,11 @@ class Register():
       print("Error: {}".format(e))
     finally:
       cursor.close()
+      conn.close()
 
   def load(self, per_page, current_page):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       query = """
           SELECT 
@@ -194,7 +199,8 @@ class Register():
       cursor.close()
 
   def get_total(self):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       query = """
           SELECT COUNT(*) AS total FROM access_register;
@@ -209,9 +215,11 @@ class Register():
       print("Error: {}".format(e))
     finally:
       cursor.close()
+      conn.close()
 
   def update(self, driver_id, kms, destiny, observation, _id):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       # Rescatamos la data para luego compararla
       data = {
@@ -239,7 +247,7 @@ class Register():
       cursor.execute(query, params)
       # Si los datos enviados on diferentes se actualizará
       if cursor.rowcount > 0:
-        self.conn.commit()
+        conn.commit()
         return (True, {'message':'Registro actualizado correctamente'})  
       # Si no se actualiza verificamos que datos enviados sean iguales a los existentes
       keys = list(data.keys())
@@ -256,9 +264,11 @@ class Register():
       print("Error: {}".format(e))
     finally:
       cursor.close()
+      conn.close()
 
   def addNew(self, driver_id, vehicle_id, user_id, kms, destiny, observation, status_type_id):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       query = """
         INSERT INTO access_register(
@@ -284,7 +294,7 @@ class Register():
       params = (driver_id, vehicle_id, user_id, kms, destiny, observation, register_type_id)
       cursor.execute(query, params)
       if cursor.rowcount > 0:
-        self.conn.commit()
+        conn.commit()
         if self.update_status(new_status_id, vehicle_id):
           return (True, {'message':'Registro agregado correctamente'})
         else:
@@ -295,10 +305,12 @@ class Register():
       return (False, {'error':'Ha ocurrido un error al agregar el registro'})
     finally:
       cursor.close()
+      conn.close()
 
   # Actualiza el estado del vehiculo en cada registro 
   def update_status(self, new_status_id, _id):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       query = """
         UPDATE vehicles
@@ -308,7 +320,7 @@ class Register():
       params = (new_status_id, _id)
       cursor.execute(query, params)
       if cursor.rowcount > 0:
-        self.conn.commit()
+        conn.commit()
         return (True, {'message':'Estado actualizado correctamente'})
       return (False, {'message':'Ha ocurrido un error al actualizar el estado del vehículo'})
     except Exception as e:
@@ -316,27 +328,33 @@ class Register():
       return (False, {'error':'Ha ocurrido un error al agregar el registro'})
     finally:
       cursor.close()
+      conn.close()
 
   def delete(self, _id):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       # Si ya existe la cedula y no pertenece al mismo chofer entonces retornamos error
       query = """DELETE FROM access_register WHERE id = %s"""
       params = (_id,)
       cursor.execute(query, params)
       if cursor.rowcount > 0:
-        self.conn.commit()
+        conn.commit()
         return (True, {'message':'Registro eliminado correctamente'})
       return (False, {'message':'Ha ocurrido un error al eliminar el registro'})
         
-    except Exception as e:
-      print("Error: {}".format(e)) 
+    except mysql.connector.Error as e:
+      print("Error: {}".format(e))
+      if e.errno == 1451:
+        return (False, {'error':'No es posible eliminar el registro, tiene registros vinculados'})
       return (False, {'error':'Ha ocurrido un error al eliminar el registro'})
     finally:
       cursor.close()
+      conn.close()
 
   def get_home_arrival_data(self):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       # Si ya existe la cedula y no pertenece al mismo chofer entonces retornamos error
       query = """
@@ -362,9 +380,11 @@ class Register():
       return (False, None)
     finally:
       cursor.close()
+      conn.close()
 
   def get_home_exit_data(self):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       # Si ya existe la cedula y no pertenece al mismo chofer entonces retornamos error
       query = """
@@ -390,9 +410,11 @@ class Register():
       return (False, None)
     finally:
       cursor.close()
+      conn.close()
 
   def get_register(self, _id):
-    cursor = self.new_cursor()
+    conn = self.conn.connect()
+    cursor = conn.cursor(dictionary=True)
     try:
       # Si ya existe la cedula y no pertenece al mismo chofer entonces retornamos error
       query = """
@@ -413,5 +435,6 @@ class Register():
       return (False, None)
     finally:
       cursor.close()
+      conn.close()
   
 RegisterModel = Register()
