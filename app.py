@@ -10,7 +10,7 @@ app.secret_key = secret_key
 CORS(app, resources={r"/*": {"origins": url_frontend}}, expose_headers=["Content-Disposition"])
 
 # Configuración de la ubicación de Tesseract OCR
-pytesseract.pytesseract.tesseract_cmd = r'C:\Users\Hp\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 config = '--psm 1'
 
 app.register_blueprint(user.user_bp, url_prefix='/user')

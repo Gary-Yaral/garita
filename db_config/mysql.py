@@ -1,4 +1,3 @@
-import mysql.connector
 from config.env import mysql_config
 import mysql.connector.pooling as pooling
 
